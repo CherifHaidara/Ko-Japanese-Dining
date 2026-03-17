@@ -1,0 +1,25 @@
+{
+  "name": "ko-japanese-dining",
+  "version": "1.0.0",
+  "description": "Ko Japanese Dining web application - CMSC 447",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CherifHaidara/Ko-Japanese-Dining.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CherifHaidara/Ko-Japanese-Dining/issues"
+  },
+  "homepage": "https://github.com/CherifHaidara/Ko-Japanese-Dining#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
