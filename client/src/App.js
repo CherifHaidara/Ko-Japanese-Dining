@@ -78,29 +78,25 @@ function App() {
       <h1>Ko Japanese Dining</h1>
 
       {/* Featured Items */}
-      <h2>Featured Items</h2>
-  
-      <div>
-        {featuredItems.map((item, index) => (
-          <div
-            key={index}
-            onClick={() => setSelectedItem(item)}
-            style={{
-              cursor: "pointer",
-              marginTop: "10px",
-              border: "2px solid gold",
-              padding: "10px"
-            }}
-          >
-            <img src={item.image} alt={item.name} />
-            <h3>{item.name}</h3>
-            <p>${item.price}</p>
-          </div>
-        ))}
+      <div className="featured">
+        <h2>Featured</h2>
+        <div className="featured-items">
+          {featuredItems.map((item, index) => (
+            <div
+              key={index}
+              className="featured-card"
+              onClick={() => setSelectedItem(item)}
+            >
+              <img src={item.image} alt={item.name} />
+              <h4>{item.name}</h4>
+              <p>${item.price}</p>
+            </div>
+          ))}
+        </div>
       </div>
   
       {/* Tabs */}
-      <div>
+      <div className="tabs">
         {Object.keys(menu).map((tab) => (
           <button key={tab} onClick={() => setSelectedTab(tab)}>
             {tab}
@@ -109,12 +105,12 @@ function App() {
       </div>
 
       {/* Menu Items */}
-      <div>
+      <div className="menu-grid">
         {menu[selectedTab].map((item, index) => (
           <div
             key={index}
+            className="menu-card"
             onClick={() => setSelectedItem(item)}
-            style={{ cursor: "pointer", marginTop: "20px" }}
           >
             <img src={item.image} alt={item.name} />
             <h3>{item.name}</h3>
@@ -125,35 +121,23 @@ function App() {
 
       {/*MODAL */}
       {selectedItem && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "rgba(0,0,0,0.5)"
-        }}>
-          <div style={{
-            background: "white",
-            margin: "10% auto",
-            padding: "20px",
-            width: "300px"
-          }}>
+        <div className="modal-overlay">
+          <div className="modal">
             <button onClick={() => setSelectedItem(null)}>Close</button>
-
+      
             <img src={selectedItem.image} alt={selectedItem.name} />
             <h2>{selectedItem.name}</h2>
             <p>${selectedItem.price}</p>
-
+      
             <p>{selectedItem.description}</p>
-
+      
             <h4>Modifiers:</h4>
             <ul>
               {selectedItem.modifiers?.map((mod, i) => (
                 <li key={i}>{mod}</li>
               ))}
             </ul>
-
+      
             <h4>Allergens:</h4>
             <ul>
               {selectedItem.allergens?.map((allergen, i) => (
@@ -163,7 +147,6 @@ function App() {
           </div>
         </div>
       )}
-    </div>
   );
 }
 
