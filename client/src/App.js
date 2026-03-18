@@ -19,7 +19,8 @@ function App() {
         image: "https://via.placeholder.com/80",
         description: "Fresh sliced salmon",
         modifiers: ["Extra wasabi"],
-        allergens: ["Fish"]
+        allergens: ["Fish"],
+        is_featured: true
       }
     ],
     Rolls: [
@@ -39,7 +40,8 @@ function App() {
         image: "https://via.placeholder.com/80",
         description: "Fresh tuna over rice",
         modifiers: ["Extra rice"],
-        allergens: ["Fish"]
+        allergens: ["Fish"],
+        is_featured: true
       }
     ],
     Ramen: [
@@ -59,18 +61,44 @@ function App() {
         image: "https://via.placeholder.com/80",
         description: "Grilled chicken with teriyaki sauce over rice",
         modifiers: ["Extra sauce"],
-        allergens: ["Soy"]
+        allergens: ["Soy"],
+        is_featured: true
       }
     ]
   };
 
   const [selectedTab, setSelectedTab] = useState("Appetizers");
   const [selectedItem, setSelectedItem] = useState(null);
+  const featuredItems = Object.values(menu)
+  .flat()
+  .filter(item => item.is_featured);
 
   return (
     <div className="App">
       <h1>Ko Japanese Dining</h1>
 
+      {/* Featured Items */}
+      <h2>Featured Items</h2>
+  
+      <div>
+        {featuredItems.map((item, index) => (
+          <div
+            key={index}
+            onClick={() => setSelectedItem(item)}
+            style={{
+              cursor: "pointer",
+              marginTop: "10px",
+              border: "2px solid gold",
+              padding: "10px"
+            }}
+          >
+            <img src={item.image} alt={item.name} />
+            <h3>{item.name}</h3>
+            <p>${item.price}</p>
+          </div>
+        ))}
+      </div>
+  
       {/* Tabs */}
       <div>
         {Object.keys(menu).map((tab) => (
