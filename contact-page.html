@@ -8,11 +8,17 @@
 
     <style>
         /* General Styles */
-        body {
+        body,
+        html {
             margin: 0;
+            padding: 70px 0px 0px 0px;
             font-family: Arial, Helvetica, sans-serif;
             background: #000000;
             color: #333;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            scrollbar-color: #ce0100 black;
+
         }
 
         header {
@@ -96,6 +102,11 @@
             background: #810000;
         }
 
+        .map-wrapper {
+            padding: 5px;
+            /* spacing OUTSIDE */
+        }
+
         /* Map */
         .map {
             margin-top: 30px;
@@ -143,8 +154,13 @@
 
         /* Navbar */
         nav {
-            background: #8b1e1e;
-            padding: 0 40px;
+            background: black;
+            padding: 5px 40px;
+            border-bottom: 1px solid #ccc;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
         }
 
         .nav-container {
@@ -211,6 +227,84 @@
         .show {
             display: block;
         }
+
+        /* Footer */
+        .footer {
+            background: #8b1e1e;
+            color: white;
+            text-align: center;
+            padding: 100px;
+        }
+
+        /* Grid layout */
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+
+        /* Column styles */
+        .footer-col h3 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .footer-col h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-col p,
+        .footer-col li {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-col a {
+            color: #ccc;
+            text-decoration: none;
+        }
+
+        .footer-col a:hover {
+            color: #fff;
+        }
+
+        /* Bottom strip */
+        .footer-bottom {
+            border-top: 1px solid white;
+            margin-top: 40px;
+            padding-top: 20px;
+            font-size: 13px;
+            text-align: center;
+            color: white;
+        }
+
+        .footer-col a {
+            position: relative;
+        }
+
+        .footer-col a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            width: 0;
+            height: 1px;
+            background: white;
+            transition: width 0.3s;
+        }
+
+        .footer-col a:hover::after {
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -223,30 +317,24 @@ only the page should have the resturants tab-->
     <nav>
         <div class="nav-container">
 
-            <div class="logo"><a href="#home"><img src="FillerSabaiLogo.PNG" alt="Ko Japanese Dining"></a></div>
+            <div class="logo"><a href="home-page.html"><img src="FillerSabaiLogo.PNG" alt="Ko Japanese Dining"></a>
+            </div>
 
             <ul class="nav-links">
-
-                <li><a href="#home">Home</a></li>
-
-                <li><a href="#menus">Menu</a></li>
-
-                <li><a href="#contact">Contact Page</a></li>
-
-                <li><a href="#Login">Login</a></li>
-
                 <li class="dropdown">
 
-                    <a href="#" id="restaurantBtn">Restaurants ▾</a>
+                    <a href="#" id="restaurantBtn">Restaurants and Bar ▾</a>
 
                     <ul class="dropdown-menu" id="restaurantMenu">
-                        <li><a href="#Japanese">Japanese</a></li>
-                        <li><a href="#Thai">Thai</a></li>
+                        <li><a href="https://kojapanesedining.com">Japanese</a></li>
+                        <li><a href="https://sabaithai-laodining.com">Thai</a></li>
                         <li><a href="#Bar">Bar</a></li>
                     </ul>
 
                 </li>
+                <li><a href="contact-page.html">Contact</a></li>
 
+                <li><a href="#Login">Login</a></li>
             </ul>
 
         </div>
@@ -328,34 +416,54 @@ only the page should have the resturants tab-->
         </div>
 
         <!-- Map -->
-        <div class="map">
-            <iframe src="https://maps.google.com/maps?q=38.911635,-77.047625&z=15&output=embed">
-            </iframe>
+        <div class="map-wrapper">
+            <div class="map">
+                <iframe src="https://maps.google.com/maps?q=38.911635,-77.047625&z=15&output=embed">
+                </iframe>
+            </div>
         </div>
 
     </div>
 
-    <!-- Basic footer for information shared on all pages -->
-    <footer style="background:#222; color:#fff; padding:30px; text-align:center; font-family:Arial, sans-serif;">
 
-        <h3>Join Our Email List</h3>
-        <form action="#" method="post" style="margin-bottom:20px;">
-            <input type="email" name="email" placeholder="Enter your email" required
-                style="padding:10px; width:220px; border:none; border-radius:4px; margin-right:5px;">
-            <button type="submit"
-                style="padding:10px 15px; border:none; border-radius:4px; background:#4CAF50; color:white; cursor:pointer;">
-                Subscribe
-            </button>
-        </form>
+    <footer class="footer">
+        <div class="footer-container">
 
-        <p style="display: inline;">📞 </p>
-        <b style="display: inline;">Call us:</b>
-        <p style="display: inline;"> +1 (771)-772-3358 </p>
+            <div class="footer-col">
+                <h3>Ko Dining</h3>
+                <p>Experience elevated dining in the heart of the city.</p>
+            </div>
 
-        <p style="margin-top:15px; font-size:14px; color:#aaa;">
-            © 2026 KoJapanese™. All Rights Reserved.
-        </p>
+            <div class="footer-col">
+                <h4>Location</h4>
+                <p>1610 20th St NW, 2nd Floor<br>
+                    Washington, DC 20009</p>
+            </div>
 
+            <div class="footer-col">
+                <h4>Hours</h4>
+                <p>
+                    Mon: Closed<br>
+                    Tue - Thur: 11:30am - 3pm & 5pm - 9pm<br>
+                    Fri: 11:30am - 3pm & 5pm - 10pm<br>
+                    Sat: 11:30am - 10pm<br>
+                    Sun: 11:30am - 9pm</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="#">Restaurants</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Ko Dining | Privacy Policy</p>
+        </div>
     </footer>
     <script>
         // Form Validation
@@ -391,6 +499,7 @@ only the page should have the resturants tab-->
             e.preventDefault();
             menu.classList.toggle("show");
         });
+
 
 
     </script>
