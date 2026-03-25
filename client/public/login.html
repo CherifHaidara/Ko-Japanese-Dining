@@ -6,6 +6,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
+    /* Navbar */
+        nav {
+            background: black;
+            padding: 5px 0px;
+            border-bottom: 1px solid #ccc;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+
+        }
+
+        #navbar.hide {
+            transform: translateY(-100%);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        /* Logo */
+        .logo {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* Nav links */
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links li {
+            position: relative;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            display: block;
+        }
+
+        .nav-links a:hover {
+            background: #a82929;
+            border-radius: 5px;
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 40px;
+            left: 0;
+            background: white;
+            list-style: none;
+            min-width: 150px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .dropdown-menu li a {
+            color: #333;
+            padding: 10px;
+        }
+
+        .dropdown-menu li a:hover {
+            background: #f2f2f2;
+        }
+
+        /* Show dropdown */
+        .show {
+            display: block;
+        }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -85,6 +166,32 @@
   </style>
 </head>
 <body>
+  <nav>
+        <div class="nav-container">
+
+            <div class="logo"><a href="home-page.html"><img src="../images/FillerSabaiLogo.PNG" alt="Ko Japanese Dining"></a>
+            </div>
+
+            <ul class="nav-links">
+                <li class="dropdown">
+
+                    <a href="#" id="restaurantBtn">Restaurants and Bar ▾</a>
+
+                    <ul class="dropdown-menu" id="restaurantMenu">
+                        <li><a href="https://kojapanesedining.com">Japanese</a></li>
+                        <li><a href="https://sabaithai-laodining.com">Thai</a></li>
+                        <li><a href="#Bar">Bar</a></li>
+                    </ul>
+
+                </li>
+                <li><a href="contact-page.html">Contact</a></li>
+
+                <li><a href="login.html">Login</a></li>
+            </ul>
+
+        </div>
+    </nav>
+
   <div class="box">
     <h1>Ko Japanese Dining</h1>
     <h3>Login</h3>
@@ -151,6 +258,31 @@
       } catch (error) {
         message.textContent = "Could not connect to the server.";
       }
+    });
+
+    //Navigation Bar Dropdown Script
+    let lastScrollTop = 0;
+    const navbar = document.getElementById("navbar");
+
+    window.addEventListener("scroll", function () {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (scrollTop > lastScrollTop) {
+            // Scrolling DOWN → hide navbar
+            navbar.classList.add("hide");
+        } else {
+            // Scrolling UP → show navbar
+            navbar.classList.remove("hide");
+        }
+
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+    const btn = document.getElementById("restaurantBtn");
+    const menu = document.getElementById("restaurantMenu");
+
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        menu.classList.toggle("show");
     });
   </script>
 </body>
