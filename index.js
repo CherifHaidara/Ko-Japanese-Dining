@@ -3,6 +3,9 @@ const cors = require('cors');
 require('dotenv').config();
 const authMiddleware = require('./middleware/auth');
 const menuRoutes = require('./routes/menu');
+const adminRoutes = require('./routes/admin');
+const authRoutes = require('./routes/auth');
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,11 +17,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/menu', menuRoutes);
-// app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 // app.use('/api/orders', orderRoutes);
 // app.use('/api/reservations', reservationRoutes);
 // app.use('/api/loyalty', loyaltyRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/', (req, res) => {
