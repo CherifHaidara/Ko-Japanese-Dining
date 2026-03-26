@@ -4,11 +4,11 @@ require('dotenv').config();
 const authMiddleware = require('./middleware/auth');
 const menuRoutes = require('./routes/menu');
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const orderRoutes = require('./routes/orders');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const orderRoutes = require('./routes/orders');
-
 
 // Middleware
 app.use(cors());
@@ -21,7 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 // app.use('/api/reservations', reservationRoutes);
 // app.use('/api/loyalty', loyaltyRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/', (req, res) => {
