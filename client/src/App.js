@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
+import AdminLoginPage from './pages/AdminLoginPage';
 
 
 function createDishImage(title, accent) {
@@ -170,6 +171,17 @@ function MenuPage() {
                 <span className="stat-label">Chef Picks</span>
               </div>
             </div>
+            <div className="hero-actions">
+              <Link className="hero-action hero-action-primary" to="/admin/login">
+                Admin Access
+              </Link>
+              <button
+                className="hero-action hero-action-secondary"
+                onClick={() => setSelectedTab("Rice Dishes")}
+              >
+                View Popular Dishes
+              </button>
+            </div>
             <div className="signature-note">
               <span className="signature-kicker">Late Night Mood</span>
               <p>
@@ -315,6 +327,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MenuPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={
           <AdminRouteGuard>
             <AdminDashboard />

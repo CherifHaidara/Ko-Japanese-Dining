@@ -15,15 +15,14 @@ export default function AdminRouteGuard({ children }) {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    // No token at all → send to login
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   const role = parseTokenRole(token);
 
   if (role !== "admin") {
-    // Logged in but not admin → send to login with a message
-    return <Navigate to="/login" replace state={{ message: "Admin access required." }} />;
+    localStorage.removeItem("token");
+    return <Navigate to="/admin/login" replace state={{ message: "Admin access required." }} />;
   }
 
   return children;

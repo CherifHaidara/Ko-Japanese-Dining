@@ -3,11 +3,11 @@ const cors = require('cors');
 require('dotenv').config();
 const authMiddleware = require('./middleware/auth');
 const menuRoutes = require('./routes/menu');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const adminGuard  = require("./middleware/adminGuard");
-const orderRoutes = require("./routes/orders");
+const orderRoutes = require('./routes/orders');
 
 
 // Middleware
@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/menu', menuRoutes);
-// app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 // app.use('/api/reservations', reservationRoutes);
 // app.use('/api/loyalty', loyaltyRoutes);
@@ -36,12 +36,12 @@ app.get('/private', authMiddleware, (req, res) => {
   });
 });
 
-app.get("/dev/admin-token", (req, res) => {
-  const jwt = require("jsonwebtoken");
+app.get('/dev/admin-token', (req, res) => {
+  const jwt = require('jsonwebtoken');
   const token = jwt.sign(
-    { id: 1, name: "Test Admin", role: "admin" },
-    process.env.JWT_SECRET || "your_secret_key",
-    { expiresIn: "24h" }
+    { id: 1, name: 'Test Admin', role: 'admin' },
+    process.env.JWT_SECRET || 'secretkey',
+    { expiresIn: '24h' }
   );
   res.json({ token });
 });
@@ -50,6 +50,4 @@ app.get("/dev/admin-token", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
 module.exports = app;

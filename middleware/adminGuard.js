@@ -10,7 +10,7 @@ function adminGuard(req, res, next) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_secret_key");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
 
     if (decoded.role !== "admin") {
       return res.status(403).json({ message: "Access denied. Admins only." });
