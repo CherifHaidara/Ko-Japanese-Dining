@@ -1,5 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminRouteGuard from './components/AdminRouteGuard';
+
 
 function createDishImage(title, accent) {
   const svg = `
@@ -58,7 +62,7 @@ function createDishPreview(accent) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-function App() {
+function MenuPage() {
   const menu = useMemo(
     () => ({
       Appetizers: [
@@ -305,5 +309,21 @@ function App() {
     </div>
   );
 }
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MenuPage />} />
+        <Route path="/admin" element={
+          <AdminRouteGuard>
+            <AdminDashboard />
+          </AdminRouteGuard>
+        } />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
 
 export default App;
