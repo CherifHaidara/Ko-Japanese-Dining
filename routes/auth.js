@@ -66,8 +66,6 @@ router.post('/login', async (req, res) => {
     }
   });
 });
-
-module.exports = router;
 router.post('/admin-login', (req, res) => {
   const password = typeof req.body?.password === 'string' ? req.body.password : '';
 
