@@ -1,0 +1,78 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0" version="29.6.6">
+  <diagram name="Restaurant Use Case Diagram" id="LmfROMLwPgn9HeVvqcdX">
+    <mxGraphModel dx="1953" dy="696" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="kE9H6h451LaKP_EiMJVJ-8" edge="1" parent="1" source="JMbT2IRiPDFbweMgtLKP-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="JMbT2IRiPDFbweMgtLKP-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;" value="&lt;div&gt;User&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="260" width="200" x="60" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="kE9H6h451LaKP_EiMJVJ-7" edge="1" parent="1" source="JMbT2IRiPDFbweMgtLKP-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="JMbT2IRiPDFbweMgtLKP-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Web Customer" vertex="1">
+          <mxGeometry height="60" width="30" x="-20" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Account holder" vertex="1">
+          <mxGeometry height="60" width="30" x="125" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-5" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="New Customer" vertex="1">
+          <mxGeometry height="60" width="30" x="125" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-7" edge="1" parent="1" source="JMbT2IRiPDFbweMgtLKP-8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=0.69;entryY=0.985;entryDx=0;entryDy=0;entryPerimeter=0;" target="JMbT2IRiPDFbweMgtLKP-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="165" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="View home page" vertex="1">
+          <mxGeometry height="50" width="120" x="150" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;" value="Website System" vertex="1">
+          <mxGeometry height="910" width="610" x="470" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-11" parent="JMbT2IRiPDFbweMgtLKP-10" style="ellipse;whiteSpace=wrap;html=1;" value="View Menu" vertex="1">
+          <mxGeometry height="46.25" width="89" x="61" y="113.75" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-12" parent="JMbT2IRiPDFbweMgtLKP-10" style="ellipse;whiteSpace=wrap;html=1;" value="Make Reservation" vertex="1">
+          <mxGeometry height="61.88" width="111.79" x="38.21" y="398.13" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-13" parent="JMbT2IRiPDFbweMgtLKP-10" style="ellipse;whiteSpace=wrap;html=1;" value="Order Food" vertex="1">
+          <mxGeometry height="43.75" width="91.79" x="38.21" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-14" parent="JMbT2IRiPDFbweMgtLKP-10" style="ellipse;whiteSpace=wrap;html=1;" value="Manage Menu" vertex="1">
+          <mxGeometry height="77.5" width="103.4" x="470" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-15" parent="JMbT2IRiPDFbweMgtLKP-10" style="ellipse;whiteSpace=wrap;html=1;" value="Manage Reservations" vertex="1">
+          <mxGeometry height="61.88" width="139.36" x="424.42" y="460.01" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-16" parent="JMbT2IRiPDFbweMgtLKP-10" style="ellipse;whiteSpace=wrap;html=1;" value="Update Content" vertex="1">
+          <mxGeometry height="63.75" width="93.4" x="480" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-19" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="View Contact Info" vertex="1">
+          <mxGeometry height="50" width="150" x="155" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-20" edge="1" parent="1" source="JMbT2IRiPDFbweMgtLKP-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="JMbT2IRiPDFbweMgtLKP-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-40" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="&lt;div&gt;Admin&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="1160" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="JMbT2IRiPDFbweMgtLKP-54" edge="1" parent="1" source="JMbT2IRiPDFbweMgtLKP-19" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="JMbT2IRiPDFbweMgtLKP-1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="294" y="597" as="sourcePoint" />
+            <mxPoint x="155" y="681" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="kE9H6h451LaKP_EiMJVJ-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Waiter" vertex="1">
+          <mxGeometry height="60" width="30" x="1160" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="kE9H6h451LaKP_EiMJVJ-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Kitchen" vertex="1">
+          <mxGeometry height="60" width="30" x="1160" y="730" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
