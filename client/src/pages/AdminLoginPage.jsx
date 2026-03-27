@@ -11,6 +11,42 @@ function parseTokenRole(token) {
   }
 }
 
+async function readResponsePayload(response) {
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { message: 'The server returned invalid JSON while processing admin sign-in.' };
+    }
+  }
+
+  return { message: text };
+}
+
+function normalizeAdminLoginError(errorMessage) {
+  if (!errorMessage) {
+    return 'Unable to verify admin access right now. Please try again.';
+  }
+
+  if (/proxy error/i.test(errorMessage)) {
+    return 'The frontend could not reach the backend API. Make sure the Express server is running on port 5000.';
+  }
+
+  if (/unexpected end of json input/i.test(errorMessage) || /not valid json/i.test(errorMessage)) {
+    return 'The admin login endpoint did not return valid JSON. Make sure the backend is running and serving /api/auth/admin-login.';
+  }
+
+  return errorMessage;
+}
+
 export default function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,22 +68,27 @@ export default function AdminLoginPage() {
       const response = await fetch('/api/auth/admin-login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
         },
         body: JSON.stringify({ password })
       });
 
-      const data = await response.json();
+      const data = await readResponsePayload(response);
 
       if (!response.ok) {
-        throw new Error(data.message || 'Unable to verify admin access.');
+        throw new Error(normalizeAdminLoginError(data.message));
+      }
+
+      if (!data.token) {
+        throw new Error('Admin authentication succeeded, but no token was returned.');
       }
 
       localStorage.setItem('token', data.token);
       navigate('/admin', { replace: true });
     } catch (submitError) {
       localStorage.removeItem('token');
-      setError(submitError.message);
+      setError(normalizeAdminLoginError(submitError.message));
     } finally {
       setIsSubmitting(false);
     }
