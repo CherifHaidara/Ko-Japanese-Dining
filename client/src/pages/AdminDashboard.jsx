@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
+  const [notice,        setNotice]        = useState(null);
   const [updating,      setUpdating]      = useState(null); // order_id being updated
 
   // ── Fetch all orders ──────────────────────────────────────────────────────
@@ -37,9 +38,19 @@ export default function AdminDashboard() {
       const res = await fetch("/api/orders", {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
-      if (!res.ok) throw new Error("Failed to load orders.");
+
+      const source = res.headers.get("X-Orders-Source");
+      const message = res.headers.get("X-Orders-Message");
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload.message || "Failed to load orders.");
+      }
+
       const data = await res.json();
       setOrders(data);
+      setNotice(source === "demo" ? message : null);
+      setError(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -71,6 +82,10 @@ export default function AdminDashboard() {
         const err = await res.json();
         throw new Error(err.message || "Update failed.");
       }
+
+      const source = res.headers.get("X-Orders-Source");
+      const message = res.headers.get("X-Orders-Message");
+      setNotice(source === "demo" ? message : null);
 
       // Update local state immediately (no need to re-fetch)
       setOrders(prev =>
@@ -113,6 +128,8 @@ export default function AdminDashboard() {
           <button className="ad-refresh-btn" onClick={fetchOrders}>↻ Refresh</button>
         </div>
       </header>
+
+      {notice ? <div className="ad-notice">{notice}</div> : null}
 
       {/* ── Kanban Board ── */}
       <div className="ad-board">

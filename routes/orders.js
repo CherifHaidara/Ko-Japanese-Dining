@@ -1,7 +1,7 @@
 const express = require("express");
 const router  = express.Router();
-const db      = require("../database/db");
 const adminGuard = require("../middleware/adminGuard");
+const { listOrders, updateOrderStatus } = require("../database/ordersStore");
 
 // Valid status progression
 const STATUS_FLOW = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"];
@@ -10,10 +10,14 @@ const STATUS_FLOW = ["pending", "confirmed", "preparing", "ready", "completed", 
 // Returns all orders sorted newest first (admin only)
 router.get("/", adminGuard, async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT * FROM orders ORDER BY created_at DESC"
-    );
-    res.json(rows);
+    const result = await listOrders();
+
+    if (result.source === "demo" && result.message) {
+      res.set("X-Orders-Source", "demo");
+      res.set("X-Orders-Message", result.message);
+    }
+
+    res.json(result.orders);
   } catch (err) {
     console.error("GET /api/orders error:", err);
     res.status(500).json({ message: "Failed to fetch orders." });
@@ -34,42 +38,25 @@ router.patch("/:id/status", adminGuard, async (req, res) => {
   }
 
   try {
-    // Confirm order exists
-    const [rows] = await db.query(
-      "SELECT * FROM orders WHERE order_id = ?",
-      [orderId]
-    );
+    const result = await updateOrderStatus(orderId, status);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Order not found." });
+    if (result.source === "demo" && result.message) {
+      res.set("X-Orders-Source", "demo");
+      res.set("X-Orders-Message", result.message);
     }
-
-    const currentStatus = rows[0].status;
-
-    // Prevent moving backwards (except to cancelled which is always allowed)
-    const currentIndex = STATUS_FLOW.indexOf(currentStatus);
-    const newIndex     = STATUS_FLOW.indexOf(status);
-
-    if (status !== "cancelled" && newIndex < currentIndex) {
-      return res.status(400).json({
-        message: `Cannot move order backwards from "${currentStatus}" to "${status}".`
-      });
-    }
-
-    // Apply the update
-    await db.query(
-      "UPDATE orders SET status = ? WHERE order_id = ?",
-      [status, orderId]
-    );
 
     res.json({
       message: `Order #${orderId} status updated to "${status}".`,
-      order_id: parseInt(orderId),
-      previous_status: currentStatus,
-      new_status: status
+      order_id: result.order_id,
+      previous_status: result.previous_status,
+      new_status: result.new_status
     });
 
   } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ message: err.message });
+    }
+
     console.error("PATCH /api/orders/:id/status error:", err);
     res.status(500).json({ message: "Failed to update order status." });
   }
