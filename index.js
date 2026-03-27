@@ -8,7 +8,9 @@ const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const configuredPort = Number(process.env.PORT);
+// Port 5000 commonly collides with macOS AirPlay/AirTunes, so default the dev server to 5050.
+const PORT = configuredPort && configuredPort !== 5000 ? configuredPort : 5050;
 
 // Middleware
 app.use(cors());
