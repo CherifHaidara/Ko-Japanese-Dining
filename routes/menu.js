@@ -1,48 +1,72 @@
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
+const db      = require('../database/db');
 
-// Mock data
-const categories = [
-  { id: 1, name: "Sushi" },
-  { id: 2, name: "Drinks" }
-];
+// GET /api/menu/full?menu=Dinner
+// Returns all sections and items for a given menu category
+router.get('/full', async (req, res) => {
+  const menuName = req.query.menu || 'Dinner';
 
-const sections = {
-  1: [
-    { id: 101, name: "Nigiri" },
-    { id: 102, name: "Rolls" }
-  ],
-  2: [
-    { id: 201, name: "Soft Drinks" },
-    { id: 202, name: "Alcohol" }
-  ]
-};
+  try {
+    const [categories] = await db.query(
+      'SELECT category_id, name FROM menu_categories WHERE name = ? AND is_active = TRUE',
+      [menuName]
+    );
 
-const items = {
-  101: [
-    { id: 1001, name: "Salmon Nigiri", price: 5 },
-    { id: 1002, name: "Tuna Nigiri", price: 6 }
-  ],
-  102: [
-    { id: 1003, name: "California Roll", price: 8 }
-  ]
-};
+    if (categories.length === 0) {
+      return res.status(404).json({ message: `Menu "${menuName}" not found.` });
+    }
+
+    const category = categories[0];
+
+    const [sections] = await db.query(
+      'SELECT section_id, name FROM menu_sections WHERE category_id = ? AND is_active = TRUE ORDER BY display_order',
+      [category.category_id]
+    );
+
+    const result = [];
+
+    for (const section of sections) {
+      const [items] = await db.query(
+        `SELECT item_id, name, description, price, image_url, is_featured, display_order
+         FROM menu_items
+         WHERE section_id = ? AND is_available = TRUE
+         ORDER BY display_order`,
+        [section.section_id]
+      );
+
+      result.push({
+        section: section.name,
+        items: items.map(item => ({
+          id:          item.item_id,
+          name:        item.name,
+          description: item.description,
+          price:       parseFloat(item.price),
+          image_url:   item.image_url,
+          is_featured: item.is_featured === 1
+        }))
+      });
+    }
+
+    res.json({ menu: menuName, sections: result });
+
+  } catch (err) {
+    console.error('GET /api/menu/full error:', err);
+    res.status(500).json({ message: 'Failed to load menu.' });
+  }
+});
 
 // GET /api/menu/categories
-router.get('/categories', (req, res) => {
-  res.json(categories);
-});
-
-// GET /api/menu/sections/:categoryId
-router.get('/sections/:categoryId', (req, res) => {
-  const categoryId = req.params.categoryId;
-  res.json(sections[categoryId] || []);
-});
-
-// GET /api/menu/items/:sectionId
-router.get('/items/:sectionId', (req, res) => {
-  const sectionId = req.params.sectionId;
-  res.json(items[sectionId] || []);
+router.get('/categories', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT category_id, name, description FROM menu_categories WHERE is_active = TRUE ORDER BY display_order'
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('GET /api/menu/categories error:', err);
+    res.status(500).json({ message: 'Failed to load categories.' });
+  }
 });
 
 module.exports = router;
