@@ -7,13 +7,23 @@ const adminGuard = require("../middleware/adminGuard");
 const STATUS_FLOW = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"];
 
 // ── GET /api/orders ─────────────────────────────────────────────────────────
-// Returns all orders sorted newest first (admin only)
+// Returns all orders with their items, sorted newest first (admin only)
 router.get("/", adminGuard, async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const [orders] = await db.query(
       "SELECT * FROM orders ORDER BY created_at DESC"
     );
-    res.json(rows);
+
+    const [items] = await db.query(
+      "SELECT * FROM order_items"
+    );
+
+    const ordersWithItems = orders.map(order => ({
+      ...order,
+      items: items.filter(item => item.order_id === order.order_id)
+    }));
+
+    res.json(ordersWithItems);
   } catch (err) {
     console.error("GET /api/orders error:", err);
     res.status(500).json({ message: "Failed to fetch orders." });
