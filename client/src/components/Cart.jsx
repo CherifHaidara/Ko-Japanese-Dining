@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Cart.css';
 
@@ -7,6 +8,7 @@ const TAX_RATE = 0.0875;
 export default function Cart() {
   const [isOpen, setIsOpen] = useState(false);
   const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice } = useCart();
+  const navigate = useNavigate();
 
   const tax = totalPrice * TAX_RATE;
   const orderTotal = totalPrice + tax;
@@ -96,7 +98,7 @@ export default function Cart() {
                     </div>
                   </div>
 
-                  <button className="cart-checkout-btn">Proceed to Checkout</button>
+                  <button className="cart-checkout-btn" onClick={() => { setIsOpen(false); navigate('/checkout'); }}>Proceed to Checkout</button>
                   <button className="cart-clear-btn" onClick={clearCart}>Clear cart</button>
                 </div>
               </>
