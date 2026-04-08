@@ -89,13 +89,7 @@ export default function AdminDashboard() {
   const ordersByStatus = (status) =>
     orders.filter(o => o.status === status);
 
-  const parseItems = (items) => {
-    try {
-      return typeof items === "string" ? JSON.parse(items) : items;
-    } catch {
-      return [];
-    }
-  };
+  const parseItems = (items) => Array.isArray(items) ? items : [];
 
   if (loading) return <div className="ad-loading">Loading orders…</div>;
   if (error)   return <div className="ad-error">⚠ {error}</div>;
@@ -140,7 +134,7 @@ export default function AdminDashboard() {
                   <div className="ad-card-name">{order.customer_name}</div>
                   <div className="ad-card-items">
                     {parseItems(order.items).map((item, i) => (
-                      <span key={i} className="ad-item-pill">{item.name}</span>
+                      <span key={i} className="ad-item-pill">{item.item_name}</span>
                     ))}
                   </div>
                   <div className="ad-card-time">
@@ -195,7 +189,7 @@ export default function AdminDashboard() {
               <ul className="ad-items-list">
                 {parseItems(selectedOrder.items).map((item, i) => (
                   <li key={i} className="ad-item-row">
-                    <span>{item.name}</span>
+                    <span>{item.item_name}</span>
                     <span>${Number(item.price).toFixed(2)}</span>
                   </li>
                 ))}
