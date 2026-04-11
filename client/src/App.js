@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import AdminLoginPage from './pages/AdminLoginPage';
+import CheckoutPage from './pages/CheckoutPage';
 import Cart from './components/Cart';
 import { CartProvider, useCart } from './context/CartContext';
 
@@ -269,6 +270,7 @@ function AppShell() {
       <Cart />
       <Routes>
         <Route path="/" element={<MenuPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={
           <AdminRouteGuard>

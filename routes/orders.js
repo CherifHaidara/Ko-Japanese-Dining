@@ -30,6 +30,44 @@ router.get("/", adminGuard, async (req, res) => {
   }
 });
 
+// ── POST /api/orders ──────────────────────────────────────────────────────────
+// Creates a new order with its items
+router.post("/", async (req, res) => {
+  const { customer_id, customer_name, customer_email, total, notes, items } = req.body;
+
+  if (!customer_name || !total || !items || items.length === 0) {
+    return res.status(400).json({ message: "Missing required order fields." });
+  }
+
+  try {
+    const [result] = await db.query(
+      `INSERT INTO orders (customer_id, customer_name, customer_email, total, status, notes)
+       VALUES (?, ?, ?, ?, 'pending', ?)`,
+      [customer_id || null, customer_name, customer_email || null, total, notes || null]
+    );
+
+    const orderId = result.insertId;
+
+    for (const item of items) {
+      const modifiers = item.modifiers
+        ? JSON.stringify(item.modifiers)
+        : null;
+
+      await db.query(
+        `INSERT INTO order_items (order_id, item_id, item_name, item_price, quantity, modifiers)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [orderId, item.item_id || null, item.item_name, item.item_price, item.quantity || 1, modifiers]
+      );
+    }
+
+    res.status(201).json({ message: "Order placed successfully.", order_id: orderId });
+
+  } catch (err) {
+    console.error("POST /api/orders error:", err);
+    res.status(500).json({ message: "Failed to place order." });
+  }
+});
+
 // ── PATCH /api/orders/:id/status ─────────────────────────────────────────────
 // Moves an order to a new status stage (admin only)
 router.patch("/:id/status", adminGuard, async (req, res) => {
