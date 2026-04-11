@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './CheckoutPage.css';
 
@@ -32,7 +32,6 @@ function formatExpiry(val) {
 }
 
 export default function CheckoutPage() {
-  const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
   const pickupTimes = useMemo(() => generatePickupTimes(), []);
 
@@ -49,10 +48,11 @@ export default function CheckoutPage() {
     cvv:          '',
   });
 
-  const [submitted, setSubmitted] = useState(false);
-  const [orderId,   setOrderId]   = useState(null);
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState('');
+  const [submitted,      setSubmitted]      = useState(false);
+  const [orderId,        setOrderId]        = useState(null);
+  const [orderSnapshot,  setOrderSnapshot]  = useState(null);
+  const [loading,        setLoading]        = useState(false);
+  const [error,          setError]          = useState('');
 
   const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -91,6 +91,14 @@ export default function CheckoutPage() {
       if (!response.ok) throw new Error(data.message || 'Order failed.');
 
       setOrderId(data.order_id);
+      setOrderSnapshot({
+        name:       form.name,
+        pickupTime: form.pickupTime,
+        items:      [...items],
+        subtotal:   totalPrice,
+        tax,
+        total:      orderTotal,
+      });
       clearCart();
       setSubmitted(true);
     } catch (err) {
@@ -113,15 +121,59 @@ export default function CheckoutPage() {
     );
   }
 
-  if (submitted) {
+  if (submitted && orderSnapshot) {
+    const { name, pickupTime, items: snapItems, subtotal, tax: snapTax, total: snapTotal } = orderSnapshot;
     return (
       <div className="checkout-shell">
-        <div className="checkout-success">
-          <div className="checkout-success-icon">✅</div>
-          <h2>Order placed!</h2>
-          <p>Thank you, {form.name}. Your order has been received.</p>
-          <p>Estimated pickup time: <strong>{form.pickupTime}</strong></p>
-          {orderId && <p className="checkout-success-order">Order #{orderId}</p>}
+        <div className="confirmation-wrap">
+          <div className="confirmation-header">
+            <div className="confirmation-check">&#10003;</div>
+            <h1 className="confirmation-title">Order Confirmed</h1>
+            <p className="confirmation-sub">Thank you, {name}. We have received your order.</p>
+          </div>
+
+          <div className="confirmation-body">
+            <div className="confirmation-meta">
+              <div className="confirmation-meta-item">
+                <span className="confirmation-meta-label">Order Number</span>
+                <span className="confirmation-meta-value">#{orderId}</span>
+              </div>
+              <div className="confirmation-meta-item">
+                <span className="confirmation-meta-label">Estimated Pickup</span>
+                <span className="confirmation-meta-value">{pickupTime}</span>
+              </div>
+            </div>
+
+            <div className="confirmation-items">
+              <p className="confirmation-section-title">Items Ordered</p>
+              {snapItems.map((item, i) => (
+                <div key={i} className="confirmation-item">
+                  {item.image && <img src={item.image} alt={item.name} className="confirmation-item-img" />}
+                  <div className="confirmation-item-info">
+                    <span className="confirmation-item-name">{item.name}</span>
+                    <span className="confirmation-item-qty">x{item.quantity}</span>
+                  </div>
+                  <span className="confirmation-item-price">${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="confirmation-totals">
+              <div className="confirmation-total-row">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="confirmation-total-row">
+                <span>Tax (8.75%)</span>
+                <span>${snapTax.toFixed(2)}</span>
+              </div>
+              <div className="confirmation-total-row confirmation-total-row--grand">
+                <span>Total</span>
+                <span>${snapTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
           <Link to="/" className="checkout-success-btn">Back to Menu</Link>
         </div>
       </div>
