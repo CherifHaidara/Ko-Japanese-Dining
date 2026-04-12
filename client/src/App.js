@@ -5,6 +5,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CheckoutPage from './pages/CheckoutPage';
+import OrderStatusPage from './pages/OrderStatusPage';
 import Cart from './components/Cart';
 import { CartProvider, useCart } from './context/CartContext';
 
@@ -271,6 +272,7 @@ function AppShell() {
       <Routes>
         <Route path="/" element={<MenuPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order/:id" element={<OrderStatusPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={
           <AdminRouteGuard>
