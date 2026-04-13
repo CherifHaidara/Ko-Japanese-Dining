@@ -68,6 +68,31 @@ router.post("/", async (req, res) => {
   }
 });
 
+// ── GET /api/orders/:id ───────────────────────────────────────────────────────
+// Returns a single order with its items (public — customers use this to track)
+router.get("/:id", async (req, res) => {
+  try {
+    const [orders] = await db.query(
+      "SELECT * FROM orders WHERE order_id = ?",
+      [req.params.id]
+    );
+
+    if (orders.length === 0) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    const [items] = await db.query(
+      "SELECT * FROM order_items WHERE order_id = ?",
+      [req.params.id]
+    );
+
+    res.json({ ...orders[0], items });
+  } catch (err) {
+    console.error("GET /api/orders/:id error:", err);
+    res.status(500).json({ message: "Failed to fetch order." });
+  }
+});
+
 // ── PATCH /api/orders/:id/status ─────────────────────────────────────────────
 // Moves an order to a new status stage (admin only)
 router.patch("/:id/status", adminGuard, async (req, res) => {

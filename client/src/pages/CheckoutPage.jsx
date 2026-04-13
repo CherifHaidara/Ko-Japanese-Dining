@@ -174,7 +174,10 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <Link to="/" className="checkout-success-btn">Back to Menu</Link>
+          <div className="confirmation-actions">
+            <Link to={`/order/${orderId}`} className="checkout-success-btn">Track Order</Link>
+            <Link to="/" className="confirmation-menu-link">Back to Menu</Link>
+          </div>
         </div>
       </div>
     );

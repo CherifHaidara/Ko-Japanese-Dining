@@ -1,0 +1,244 @@
+.status-shell {
+  width: min(700px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 48px 0 96px;
+}
+
+.status-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 32px;
+  transition: color 0.2s;
+}
+
+.status-back:hover { color: var(--text); }
+
+.status-loading,
+.status-error {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-muted);
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-back-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  background: var(--red);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── Wrap ── */
+.status-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Header ── */
+.status-header {
+  text-align: center;
+}
+
+.status-order-num {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.status-title {
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.status-pickup {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ── Progress tracker ── */
+.status-tracker {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px 0;
+  overflow-x: auto;
+}
+
+.status-step-wrap {
+  display: flex;
+  align-items: flex-start;
+}
+
+.status-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.status-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.status-step.done .status-dot {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+.status-step.current .status-dot {
+  border-color: var(--red);
+}
+
+.status-dot-check {
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.status-dot-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.6; }
+}
+
+.status-step-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.status-step.done .status-step-label,
+.status-step.current .status-step-label {
+  color: var(--text);
+}
+
+.status-line {
+  height: 2px;
+  width: 40px;
+  background: var(--border);
+  margin-top: 17px;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.status-line.done {
+  background: #22c55e;
+}
+
+/* ── Cancelled ── */
+.status-cancelled-msg {
+  text-align: center;
+  padding: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ── Items card ── */
+.status-items-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-items-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-item-info {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.status-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.status-item-qty {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.status-item-price {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.status-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+/* ── Footer note ── */
+.status-refresh-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
