@@ -5,6 +5,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import AdminLoginPage from './pages/AdminLoginPage';
 import Cart from './components/Cart';
+import Contact from './pages/Contact';
+import Home from './pages/Home';
+import NotFound from './pages/NotFound'
+
 import { CartProvider, useCart } from './context/CartContext';
 
 function createDishImage(title, accent) {
@@ -45,17 +49,34 @@ function useTheme() {
 }
 
 function Navbar({ theme, toggleTheme }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <img src="/Ko_logo.png" alt="Ko Japanese Dining" className="navbar-logo" />
+          <img
+            src="/Ko_logo.png"
+            alt="Ko Japanese Dining"
+            className="navbar-logo"
+          />
           <span className="navbar-name">Ko Japanese Dining</span>
         </Link>
+
         <div className="navbar-actions">
+
+          
+          <Link to="/japanese-menu" className="nav-admin-link">Menu</Link>
           <Link to="/admin/login" className="nav-admin-link">Admin</Link>
-          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === 'light' ? '🌙' : '☀️'}
+          <Link to="/contact" className="nav-admin-link">Contact</Link>
+          <Link to="/sign-up" className="nav-admin-link">Sign Up</Link>
+
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? "🌙" : "☀️"}
           </button>
         </div>
       </div>
@@ -268,13 +289,16 @@ function AppShell() {
       <Navbar theme={theme} toggleTheme={toggle} />
       <Cart />
       <Routes>
-        <Route path="/" element={<MenuPage />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/japanese-menu" element={<MenuPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={
           <AdminRouteGuard>
             <AdminDashboard />
           </AdminRouteGuard>
         } />
+        <Route path="*" element={<NotFound />}/>
       </Routes>
     </>
   );
