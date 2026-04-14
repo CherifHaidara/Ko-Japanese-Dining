@@ -14,6 +14,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE IF NOT EXISTS orders (
     order_id       INT            NOT NULL AUTO_INCREMENT,
+    customer_id    INT,
     customer_name  VARCHAR(100)   NOT NULL,
     customer_email VARCHAR(150),
     total          DECIMAL(8, 2)  NOT NULL,
@@ -29,7 +30,10 @@ CREATE TABLE IF NOT EXISTS orders (
     created_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
                                   ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (order_id)
+    PRIMARY KEY (order_id),
+    CONSTRAINT fk_order_customer
+        FOREIGN KEY (customer_id) REFERENCES users (user_id)
+        ON DELETE SET NULL
 );
 
 -- Stores each individual item within an order.

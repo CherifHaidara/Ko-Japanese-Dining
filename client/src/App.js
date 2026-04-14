@@ -1,15 +1,20 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import AdminLoginPage from './pages/AdminLoginPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderStatusPage from './pages/OrderStatusPage';
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
 import Cart from './components/Cart';
 import Contact from './pages/Contact';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound'
 
 import { CartProvider, useCart } from './context/CartContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 function createDishImage(title, accent) {
   const svg = `
@@ -51,6 +56,7 @@ function useTheme() {
 function Navbar({ theme, toggleTheme }) {
   const [open, setOpen] = useState(false);
 
+  const { user } = useAuth();
   return (
     <nav className="navbar">
       <div className="navbar-inner">
@@ -70,13 +76,20 @@ function Navbar({ theme, toggleTheme }) {
           <Link to="/admin/login" className="nav-admin-link">Admin</Link>
           <Link to="/contact" className="nav-admin-link">Contact</Link>
           <Link to="/sign-up" className="nav-admin-link">Sign Up</Link>
-
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-          >
-            {theme === "light" ? "🌙" : "☀️"}
+          {user ? (
+            <Link to="/profile" className="nav-profile-link">
+              {user.profile_picture ? (
+                <img src={`/uploads/${user.profile_picture}`} alt="" className="nav-profile-avatar nav-profile-avatar--img" />
+              ) : (
+                <span className="nav-profile-avatar">{user.first_name?.[0]?.toUpperCase() || '?'}</span>
+              )}
+              <span>{user.first_name}</span>
+            </Link>
+          ) : (
+            <Link to="/login" className="nav-login-link">Sign In</Link>
+          )}
+          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
       </div>
@@ -292,6 +305,11 @@ function AppShell() {
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/japanese-menu" element={<MenuPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order/:id" element={<OrderStatusPage />} />
+        <Route path="/login" element={<AuthPage defaultTab="login" />} />
+        <Route path="/signup" element={<AuthPage defaultTab="signup" />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={
           <AdminRouteGuard>
@@ -306,11 +324,13 @@ function AppShell() {
 
 function App() {
   return (
-    <CartProvider>
-      <BrowserRouter>
-        <AppShell />
-      </BrowserRouter>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

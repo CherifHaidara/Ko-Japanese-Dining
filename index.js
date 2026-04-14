@@ -7,6 +7,7 @@ const menuRoutes = require('./routes/menu');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
+const userRoutes  = require('./routes/users');
 
 const app = express();
 const configuredPort = Number(process.env.PORT);
@@ -17,6 +18,7 @@ const PORT = configuredPort && configuredPort !== 5000 ? configuredPort : 5050;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', require('express').static(require('path').join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/menu', menuRoutes);
@@ -25,6 +27,7 @@ app.use('/api/orders', orderRoutes);
 // app.use('/api/reservations', reservationRoutes);
 // app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/users', userRoutes);
 
 // Test route
 app.get('/', (req, res) => {

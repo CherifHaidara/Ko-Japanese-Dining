@@ -125,40 +125,55 @@ button { font: inherit; cursor: pointer; }
   border-color: var(--text-muted);
 }
 
-.dropdown {
-  position: relative;
-}
-
-.dropdown-toggle {
-  background: none;
-  border: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background: white;
-  color: black;
-  display: flex;
-  flex-direction: column;
-  min-width: 150px;
-  border-radius: 5px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  z-index: 1000;
-}
-
-.dropdown-menu a {
-  padding: 10px;
+.nav-login-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
   text-decoration: none;
-  color: black;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-login-link:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
 }
 
-.dropdown-menu a:hover {
-  background: #f2f2f2;
+.nav-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-profile-link:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.nav-profile-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-profile-avatar--img {
+  object-fit: cover;
+  background: none;
 }
 
 /* ── Page Shell ─────────────────────────────────────────────────────────── */
