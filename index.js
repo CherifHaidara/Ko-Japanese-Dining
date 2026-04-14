@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 const authMiddleware = require('./middleware/auth');
 const menuRoutes = require('./routes/menu');
@@ -47,6 +48,45 @@ app.get('/dev/admin-token', (req, res) => {
   );
   res.json({ token });
 });
+
+//Email services
+app.post("/api/contact", async (req, res) => {
+  const { name, email, phone, subject, message } = req.body;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+    
+    await transporter.sendMail({
+      from: email,
+      to: process.env.EMAIL,
+      subject: `Contact Form: ${subject}`,
+      text: `
+Name: ${name}
+Email: ${email}
+Phone: ${phone}
+
+Message:
+${message}
+      `,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message
+    });
+  }
+});
+
+
 
 // Start server
 app.listen(PORT, () => {

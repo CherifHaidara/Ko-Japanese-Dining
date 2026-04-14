@@ -12,6 +12,8 @@ const Contact = () => {
     message: "",
   });
 
+
+  
   const [formMessage, setFormMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -23,6 +25,50 @@ const Contact = () => {
     });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormMessage("");
+    const { name, email, phone, subject, message } = formData;
+
+    if (!name || !email || !phone || !message) {
+      setIsError(true);
+      setFormMessage("Please fill out all fields.");
+      return;
+    }
+
+    setIsError(false);
+
+    try {
+      const res = await fetch("http://localhost:5050/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setFormMessage("Thank you! Your message has been sent.");
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "general",
+          message: "",
+        });
+      } else {
+        setIsError(true);
+        setFormMessage(data.error ||"Something went wrong. Try again.");
+      }
+    } catch (err) {
+      setIsError(true);
+      setFormMessage(err.message || "Server error. Try again later.");
+    }
+  };
+
+  /*
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -35,8 +81,8 @@ const Contact = () => {
     }
 
     setIsError(false);
-    setFormMessage("Thank you! Your message has been sent.");
-
+    setFormMessage("Thank you! Your message has been sent. An email has been sent");
+    
     setFormData({
       name: "",
       email: "",
@@ -45,6 +91,7 @@ const Contact = () => {
       message: "",
     });
   };
+  */
 
   return (
     <>
