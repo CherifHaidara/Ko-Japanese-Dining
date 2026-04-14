@@ -85,58 +85,108 @@
     const loadOrdersBtn = document.getElementById("loadOrdersBtn");
     const ordersContainer = document.getElementById("ordersContainer");
     const message = document.getElementById("message");
-
+  
     async function loadOrders() {
       message.textContent = "";
       ordersContainer.innerHTML = "";
-
+  
       const token = localStorage.getItem("token");
-
+  
       try {
-        const res = await fetch("http://localhost:5000/api/admin/orders", {
-          method: "GET",
+        const res = await fetch("http://localhost:5050/api/admin/orders", {
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {})
           }
         });
-
+  
         const data = await res.json();
-
+  
         if (!res.ok) {
           message.textContent = data.message || "Could not load orders.";
           return;
         }
-
+  
         if (!Array.isArray(data) || data.length === 0) {
           message.textContent = "No orders found.";
           return;
         }
-
+  
         data.forEach(order => {
           const card = document.createElement("div");
           card.className = "order-card";
-
+  
+          const itemsText = Array.isArray(order.items)
+            ? order.items.map(i => i.name || i).join(", ")
+            : "No items";
+  
           card.innerHTML = `
-            <h3>Order #${order._id || order.id || "N/A"}</h3>
-            <p><span class="label">Customer:</span> ${order.customerName || order.name || "Unknown"}</p>
-            <p><span class="label">Items:</span> ${
-              Array.isArray(order.items)
-                ? order.items.join(", ")
-                : "No items listed"
-            }</p>
-            <p><span class="label">Total:</span> $${order.total ?? "0.00"}</p>
-            <div class="status">${order.status || "Pending"}</div>
+            <h3>Order #${order.id}</h3>
+            <p><span class="label">Customer:</span> ${order.customerName}</p>
+            <p><span class="label">Items:</span> ${itemsText}</p>
+            <p><span class="label">Total:</span> $${order.total}</p>
+  
+            <div class="status">${order.status}</div>
+  
+            <select id="status-${order.id}">
+              <option ${order.status==="Pending"?"selected":""}>Pending</option>
+              <option ${order.status==="Preparing"?"selected":""}>Preparing</option>
+              <option ${order.status==="Ready"?"selected":""}>Ready</option>
+              <option ${order.status==="Completed"?"selected":""}>Completed</option>
+            </select>
+  
+            <br>
+            <button onclick="updateStatus(${order.id})">Update Status</button>
+            <button onclick='viewDetails(${JSON.stringify(order)})'>Details</button>
           `;
-
+  
           ordersContainer.appendChild(card);
         });
+  
       } catch (error) {
         message.textContent = "Could not connect to the server.";
       }
     }
-
+  
+    async function updateStatus(id) {
+      const token = localStorage.getItem("token");
+      const status = document.getElementById(`status-${id}`).value;
+  
+      try {
+        const res = await fetch(`http://localhost:5050/api/admin/orders/${id}/status`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status })
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          message.textContent = data.message || "Update failed.";
+          return;
+        }
+  
+        message.style.color = "lightgreen";
+        message.textContent = "Status updated";
+  
+        loadOrders();
+  
+      } catch {
+        message.textContent = "Server error.";
+      }
+    }
+  
+    function viewDetails(order) {
+      alert(JSON.stringify(order, null, 2));
+    }
+  
     loadOrdersBtn.addEventListener("click", loadOrders);
+  
+    // 🔥 real-time refresh
+    setInterval(loadOrders, 5000);
   </script>
 </body>
 </html>
