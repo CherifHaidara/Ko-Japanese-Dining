@@ -99,24 +99,23 @@ export default function CheckoutPage() {
         tax,
         total:      orderTotal,
       });
-      try{
-        const res = await fetch("http://localhost:5050/api/checkout", {
+      // Attempt confirmation email — non-blocking, order completes regardless
+      try {
+        await fetch("http://localhost:5050/api/checkout", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(
-            {
-              name: form.name, 
-              email: form.email,
-              pickup: form.pickupTime
-            }
-          ),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name:   form.name,
+            email:  form.email,
+            pickup: form.pickupTime,
+          }),
         });
-        const text = await res.json();
-        clearCart();
-        setSubmitted(true);
-      }catch(e){setError(e.message)}
+      } catch (e) {
+        console.warn("Confirmation email failed:", e.message);
+      }
+
+      clearCart();
+      setSubmitted(true);
       
     } catch (err) {
       setError(err.message);
