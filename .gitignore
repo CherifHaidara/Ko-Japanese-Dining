@@ -16,3 +16,7 @@ Thumbs.db
 # Build output
 /build
 /dist
+
+# User uploaded files
+/uploads/*
+!/uploads/.gitkeep
