@@ -1,10 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import './App.css';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CheckoutPage from './pages/CheckoutPage';
+import AccountReservationsPage from './pages/AccountReservationsPage';
+import ReservationPage from './pages/ReservationPage';
 import Cart from './components/Cart';
 import { CartProvider, useCart } from './context/CartContext';
 
@@ -45,15 +47,17 @@ function useTheme() {
   return { theme, toggle };
 }
 
-function Navbar({ theme, toggleTheme }) {
+function Navbar({ theme, toggleTheme, isReservationPage }) {
   return (
-    <nav className="navbar">
+    <nav className={isReservationPage ? "navbar navbar--reservation" : "navbar"}>
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
           <img src="/Ko_logo.png" alt="Ko Japanese Dining" className="navbar-logo" />
           <span className="navbar-name">Ko Japanese Dining</span>
         </Link>
         <div className="navbar-actions">
+          <Link to="/reservations" className="nav-admin-link">Reserve</Link>
+          <Link to="/account" className="nav-admin-link">My Reservations</Link>
           <Link to="/admin/login" className="nav-admin-link">Admin</Link>
           <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === 'light' ? '🌙' : '☀️'}
@@ -125,6 +129,9 @@ function MenuPage() {
             <button className="btn-primary" onClick={() => document.querySelector('.menu-section')?.scrollIntoView({ behavior: 'smooth' })}>
               Browse Menu
             </button>
+            <Link className="btn-outline" to="/reservations">
+              Reserve a Table
+            </Link>
             <button className="btn-outline" onClick={() => setSelectedTab("Sashimi")}>
               View Sashimi
             </button>
@@ -263,13 +270,17 @@ function MenuPage() {
 
 function AppShell() {
   const { theme, toggle } = useTheme();
+  const location = useLocation();
+  const isReservationPage = location.pathname.startsWith('/reservations');
 
   return (
     <>
-      <Navbar theme={theme} toggleTheme={toggle} />
+      <Navbar theme={theme} toggleTheme={toggle} isReservationPage={isReservationPage} />
       <Cart />
       <Routes>
         <Route path="/" element={<MenuPage />} />
+        <Route path="/reservations" element={<ReservationPage />} />
+        <Route path="/account" element={<AccountReservationsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={

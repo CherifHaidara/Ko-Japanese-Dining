@@ -65,10 +65,11 @@ Create the database first:
 mysql -u root -pyour_mysql_password -e "CREATE DATABASE IF NOT EXISTS ko_dining;"
 ```
 
-Then run the two setup files:
+Then run the setup files:
 ```bash
 mysql -u root -pyour_mysql_password ko_dining < database/menu_setup.sql
 mysql -u root -pyour_mysql_password ko_dining < database/orders_setup.sql
+mysql -u root -pyour_mysql_password ko_dining < database/reservations_setup.sql
 ```
 
 If you see a warning about the password being insecure, just ignore it — it still works. If you get a duplicate entry error on `menu_setup.sql`, that just means the data is already there, so move on to `orders_setup.sql`.
