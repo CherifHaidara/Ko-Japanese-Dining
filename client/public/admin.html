@@ -23,6 +23,32 @@
       color: #ccc;
     }
 
+    /* 🔥 NEW: Summary Cards */
+    .summary-cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .summary-card {
+      background: #1d1d1d;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      min-width: 180px;
+    }
+
+    .summary-card h3 {
+      margin-top: 0;
+      color: #ffb3b8;
+    }
+
+    .summary-card p {
+      font-size: 24px;
+      margin: 0;
+    }
+
     .orders-container {
       display: grid;
       gap: 20px;
@@ -77,6 +103,26 @@
   <h1>Ko Japanese Dining</h1>
   <h2>Admin Dashboard</h2>
 
+  <!-- 🔥 NEW: Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <h3>Total Orders</h3>
+      <p id="totalOrders">0</p>
+    </div>
+    <div class="summary-card">
+      <h3>Total Revenue</h3>
+      <p id="totalRevenue">$0</p>
+    </div>
+    <div class="summary-card">
+      <h3>Completed Orders</h3>
+      <p id="completedOrders">0</p>
+    </div>
+    <div class="summary-card">
+      <h3>Pending Orders</h3>
+      <p id="pendingOrders">0</p>
+    </div>
+  </div>
+
   <button id="loadOrdersBtn">Load Orders</button>
   <div id="message"></div>
   <div id="ordersContainer" class="orders-container"></div>
@@ -93,8 +139,7 @@
       const token = localStorage.getItem("token");
 
       try {
-        const res = await fetch("http://localhost:5000/api/admin/orders", {
-          method: "GET",
+        const res = await fetch("http://localhost:5050/api/admin/orders", {
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -113,30 +158,92 @@
           return;
         }
 
+        /* 🔥 NEW: Calculate summary stats */
+        const totalOrders = data.length;
+        const totalRevenue = data.reduce((sum, order) => sum + Number(order.total || 0), 0);
+        const completedOrders = data.filter(order => order.status === "Completed").length;
+        const pendingOrders = data.filter(order => order.status === "Pending").length;
+
+        document.getElementById("totalOrders").textContent = totalOrders;
+        document.getElementById("totalRevenue").textContent = `$${totalRevenue}`;
+        document.getElementById("completedOrders").textContent = completedOrders;
+        document.getElementById("pendingOrders").textContent = pendingOrders;
+
         data.forEach(order => {
           const card = document.createElement("div");
           card.className = "order-card";
 
+          const itemsText = Array.isArray(order.items)
+            ? order.items.map(i => i.name || i).join(", ")
+            : "No items";
+
           card.innerHTML = `
-            <h3>Order #${order._id || order.id || "N/A"}</h3>
-            <p><span class="label">Customer:</span> ${order.customerName || order.name || "Unknown"}</p>
-            <p><span class="label">Items:</span> ${
-              Array.isArray(order.items)
-                ? order.items.join(", ")
-                : "No items listed"
-            }</p>
-            <p><span class="label">Total:</span> $${order.total ?? "0.00"}</p>
-            <div class="status">${order.status || "Pending"}</div>
+            <h3>Order #${order.id}</h3>
+            <p><span class="label">Customer:</span> ${order.customerName}</p>
+            <p><span class="label">Items:</span> ${itemsText}</p>
+            <p><span class="label">Total:</span> $${order.total}</p>
+
+            <div class="status">${order.status}</div>
+
+            <select id="status-${order.id}">
+              <option ${order.status==="Pending"?"selected":""}>Pending</option>
+              <option ${order.status==="Preparing"?"selected":""}>Preparing</option>
+              <option ${order.status==="Ready"?"selected":""}>Ready</option>
+              <option ${order.status==="Completed"?"selected":""}>Completed</option>
+            </select>
+
+            <br>
+            <button onclick="updateStatus(${order.id})">Update Status</button>
+            <button onclick='viewDetails(${JSON.stringify(order)})'>Details</button>
           `;
 
           ordersContainer.appendChild(card);
         });
+
       } catch (error) {
         message.textContent = "Could not connect to the server.";
       }
     }
 
+    async function updateStatus(id) {
+      const token = localStorage.getItem("token");
+      const status = document.getElementById(`status-${id}`).value;
+
+      try {
+        const res = await fetch(`http://localhost:5050/api/admin/orders/${id}/status`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          message.textContent = data.message || "Update failed.";
+          return;
+        }
+
+        message.style.color = "lightgreen";
+        message.textContent = "Status updated";
+
+        loadOrders();
+
+      } catch {
+        message.textContent = "Server error.";
+      }
+    }
+
+    function viewDetails(order) {
+      alert(JSON.stringify(order, null, 2));
+    }
+
     loadOrdersBtn.addEventListener("click", loadOrders);
+
+    // real-time refresh
+    setInterval(loadOrders, 5000);
   </script>
 </body>
 </html>
