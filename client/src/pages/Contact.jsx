@@ -68,31 +68,6 @@ const Contact = () => {
     }
   };
 
-  /*
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const { name, email, phone, message } = formData;
-
-    if (!name || !email || !phone || !message) {
-      setIsError(true);
-      setFormMessage("Please fill out all fields.");
-      return;
-    }
-
-    setIsError(false);
-    setFormMessage("Thank you! Your message has been sent. An email has been sent");
-    
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "general",
-      message: "",
-    });
-  };
-  */
-
   return (
     <>
       <div className="container">

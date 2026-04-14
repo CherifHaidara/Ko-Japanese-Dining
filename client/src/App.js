@@ -75,7 +75,6 @@ function Navbar({ theme, toggleTheme }) {
           <Link to="/japanese-menu" className="nav-admin-link">Menu</Link>
           <Link to="/admin/login" className="nav-admin-link">Admin</Link>
           <Link to="/contact" className="nav-admin-link">Contact</Link>
-          <Link to="/sign-up" className="nav-admin-link">Sign Up</Link>
           {user ? (
             <Link to="/profile" className="nav-profile-link">
               {user.profile_picture ? (
@@ -308,7 +307,6 @@ function AppShell() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id" element={<OrderStatusPage />} />
         <Route path="/login" element={<AuthPage defaultTab="login" />} />
-        <Route path="/signup" element={<AuthPage defaultTab="signup" />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={

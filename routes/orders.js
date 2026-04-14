@@ -97,6 +97,7 @@ router.get("/:id", async (req, res) => {
 // Moves an order to a new status stage (admin only)
 router.patch("/:id/status", adminGuard, async (req, res) => {
   const orderId   = req.params.id;
+  const order = await Order.findById(req.params.id);
   const { status } = req.body;
 
   // Validate the incoming status value
@@ -141,6 +142,16 @@ router.patch("/:id/status", adminGuard, async (req, res) => {
       previous_status: currentStatus,
       new_status: status
     });
+
+    const previousStatus = order.status;
+    order.status = status;
+
+    await order.save();
+
+    // ONLY trigger email when transitioning TO "ready"
+    if (previousStatus !== 'ready' && status === 'ready') {
+
+    }
 
   } catch (err) {
     console.error("PATCH /api/orders/:id/status error:", err);

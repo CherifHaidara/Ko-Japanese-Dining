@@ -70,12 +70,42 @@ app.post("/api/contact", async (req, res) => {
       to: process.env.EMAIL,
       subject: `Contact Form: ${subject}`,
       text: `
-Name: ${name}
-Email: ${email}
-Phone: ${phone}
+      Name: ${name}
+      Email: ${email}
+      Phone: ${phone}
 
-Message:
-${message}
+      Message:
+      ${message}
+      `,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message
+    });
+  }
+});
+
+//Checkout email
+app.post("/api/checkout", async (req, res) => {
+  const { name, email, pickup} = req.body;
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+    
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to:  email,
+      subject: `Food Pick-up for ${email}`,
+      text: `Hi ${name}, Your food will be ready for pick-up at: ${pickup}!
       `,
     });
 

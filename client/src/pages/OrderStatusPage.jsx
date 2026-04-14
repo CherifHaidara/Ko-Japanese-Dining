@@ -62,8 +62,10 @@ export default function OrderStatusPage() {
   }
 
   const cancelled  = order.status === 'cancelled';
+  const isReady = order.status === 'ready';
   const stepIndex  = getStepIndex(order.status);
   const pickupTime = order.notes?.match(/Pickup at (.+?)(?:\.|$)/)?.[1] || null;
+
 
   return (
     <div className="status-shell">
@@ -82,6 +84,11 @@ export default function OrderStatusPage() {
           )}
         </div>
 
+          {order.status === 'ready' && (
+            <div className="status-ready-banner">
+              setError("Order is ready");
+            </div>
+          )}
         {/* Progress tracker */}
         {!cancelled ? (
           <div className="status-tracker">
@@ -118,7 +125,7 @@ export default function OrderStatusPage() {
               <div className="status-item-info">
                 <span className="status-item-name">{item.item_name}</span>
                 <span className="status-item-qty">x{item.quantity}</span>
-              </div>
+              </div> 
               <span className="status-item-price">
                 ${(parseFloat(item.item_price) * item.quantity).toFixed(2)}
               </span>
