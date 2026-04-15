@@ -20,3 +20,6 @@ Thumbs.db
 # User uploaded files
 /uploads/*
 !/uploads/.gitkeep
+
+
+*.svg
