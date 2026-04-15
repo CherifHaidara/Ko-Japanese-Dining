@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { buildAdminTokenClaims } = require('../auth/adminSession');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
@@ -78,7 +79,7 @@ router.post('/admin-login', (req, res) => {
   }
 
   const token = jwt.sign(
-    { id: 'admin-user', name: 'Admin User', role: 'admin' },
+    buildAdminTokenClaims({ id: 'admin-user', name: 'Admin User' }),
     JWT_SECRET,
     { expiresIn: '8h' }
   );

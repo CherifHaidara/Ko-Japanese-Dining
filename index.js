@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
 const reservationRoutes = require('./routes/reservations');
+const { buildAdminTokenClaims } = require('./auth/adminSession');
 
 const app = express();
 const configuredPort = Number(process.env.PORT);
@@ -42,7 +43,7 @@ app.get('/private', authMiddleware, (req, res) => {
 app.get('/dev/admin-token', (req, res) => {
   const jwt = require('jsonwebtoken');
   const token = jwt.sign(
-    { id: 1, name: 'Test Admin', role: 'admin' },
+    buildAdminTokenClaims({ id: 1, name: 'Test Admin' }),
     process.env.JWT_SECRET || 'secretkey',
     { expiresIn: '24h' }
   );

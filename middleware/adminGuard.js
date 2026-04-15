@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { isCurrentAdminSession } = require("../auth/adminSession");
 
 function adminGuard(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -14,6 +15,10 @@ function adminGuard(req, res, next) {
 
     if (decoded.role !== "admin") {
       return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+
+    if (!isCurrentAdminSession(decoded)) {
+      return res.status(401).json({ message: "Invalid or expired token." });
     }
 
     req.user = decoded;
