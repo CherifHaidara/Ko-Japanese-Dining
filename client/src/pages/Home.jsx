@@ -6,10 +6,10 @@ function Home() {
   const menuRef = useRef(null);
 
   const previewItems = [
-    { name: "Karaage", image: "/images/menu/karaage.svg" },
-    { name: "Tonkatsu", image: "/images/menu/tonkatsu.svg" },
-    { name: "Spicy Tuna Roll", image: "/images/menu/spicy-tuna-roll.svg" },
-    { name: "Mochi Ice Cream", image: "/images/menu/mochi-ice-cream.svg" },
+    { name: "Karaage", image: "/images/menu/karaage.png" },
+    { name: "Tonkatsu", image: "/images/menu/tonkatsu.png" },
+    { name: "Spicy Tuna Roll", image: "/images/menu/spicy-tuna-roll.png" },
+    { name: "Mochi Ice Cream", image: "/images/menu/mochi-ice-cream.png" },
   ];
 
   const toggleMenu = (e) => {
