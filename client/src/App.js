@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import AdminDashboard from './pages/AdminDashboard';
@@ -7,8 +7,16 @@ import AdminLoginPage from './pages/AdminLoginPage';
 import CheckoutPage from './pages/CheckoutPage';
 import AccountReservationsPage from './pages/AccountReservationsPage';
 import ReservationPage from './pages/ReservationPage';
+import OrderStatusPage from './pages/OrderStatusPage';
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
 import Cart from './components/Cart';
+import Contact from './pages/Contact';
+import Home from './pages/Home';
+import NotFound from './pages/NotFound';
+
 import { CartProvider, useCart } from './context/CartContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 function createDishImage(title, accent) {
   const svg = `
@@ -48,17 +56,38 @@ function useTheme() {
 }
 
 function Navbar({ theme, toggleTheme, isReservationPage }) {
+  const { user } = useAuth();
+
   return (
-    <nav className={isReservationPage ? "navbar navbar--reservation" : "navbar"}>
+    <nav className={isReservationPage ? 'navbar navbar--reservation' : 'navbar'}>
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <img src="/Ko_logo.png" alt="Ko Japanese Dining" className="navbar-logo" />
+          <img
+            src="/Ko_logo.png"
+            alt="Ko Japanese Dining"
+            className="navbar-logo"
+          />
           <span className="navbar-name">Ko Japanese Dining</span>
         </Link>
+
         <div className="navbar-actions">
+          <Link to="/japanese-menu" className="nav-admin-link">Menu</Link>
           <Link to="/reservations" className="nav-admin-link">Reserve</Link>
           <Link to="/account" className="nav-admin-link">My Reservations</Link>
           <Link to="/admin/login" className="nav-admin-link">Admin</Link>
+          <Link to="/contact" className="nav-admin-link">Contact</Link>
+          {user ? (
+            <Link to="/profile" className="nav-profile-link">
+              {user.profile_picture ? (
+                <img src={`/uploads/${user.profile_picture}`} alt="" className="nav-profile-avatar nav-profile-avatar--img" />
+              ) : (
+                <span className="nav-profile-avatar">{user.first_name?.[0]?.toUpperCase() || '?'}</span>
+              )}
+              <span>{user.first_name}</span>
+            </Link>
+          ) : (
+            <Link to="/login" className="nav-login-link">Sign In</Link>
+          )}
           <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
@@ -79,6 +108,17 @@ function MenuPage() {
   const [menuData,     setMenuData]       = useState({});
   const [loading,      setLoading]        = useState(true);
   const [fetchError,   setFetchError]     = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+
+  useEffect(() => {
+    if (!selectedItem) return;
+
+    fetch(`/api/reviews/${selectedItem.item_id}`)
+      .then(res => res.json())
+      .then(setReviews);
+  }, [selectedItem]);
 
   useEffect(() => {
     setLoading(true);
@@ -114,6 +154,23 @@ function MenuPage() {
     () => Object.values(menu).flat().filter(item => item.is_featured),
     [menu]
   );
+
+  async function submitReview() {
+    await fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        item_id: selectedItem.item_id,
+        rating,
+        comment
+      })
+    });
+
+    const res = await fetch(`/api/reviews/${selectedItem.item_id}`);
+    setReviews(await res.json());
+
+    setComment('');
+  }
 
   return (
     <div className="page">
@@ -260,6 +317,34 @@ function MenuPage() {
                   </ul>
                 </div>
               </div>
+              <div className="reviews-section">
+                <h4>Reviews</h4>
+
+                {reviews.map(r => (
+                  <div key={r.review_id} className="review">
+                    ⭐ {r.rating}/5
+                    <p>{r.comment}</p>
+                  </div>
+                ))}
+
+                <div className="review-form">
+                  <select value={rating} onChange={e => setRating(e.target.value)}>
+                    {[5,4,3,2,1].map(n => (
+                      <option key={n} value={n}>{n} Stars</option>
+                    ))}
+                  </select>
+
+                  <textarea
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                    placeholder="Write a review..."
+                  />
+
+                  <button onClick={submitReview}>
+                    Submit Review
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -271,23 +356,31 @@ function MenuPage() {
 function AppShell() {
   const { theme, toggle } = useTheme();
   const location = useLocation();
-  const isReservationPage = location.pathname.startsWith('/reservations');
+  const isReservationPage =
+    location.pathname.startsWith('/reservations') ||
+    location.pathname.startsWith('/account');
 
   return (
     <>
       <Navbar theme={theme} toggleTheme={toggle} isReservationPage={isReservationPage} />
       <Cart />
       <Routes>
-        <Route path="/" element={<MenuPage />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/japanese-menu" element={<MenuPage />} />
         <Route path="/reservations" element={<ReservationPage />} />
         <Route path="/account" element={<AccountReservationsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order/:id" element={<OrderStatusPage />} />
+        <Route path="/login" element={<AuthPage defaultTab="login" />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={
           <AdminRouteGuard>
             <AdminDashboard />
           </AdminRouteGuard>
         } />
+        <Route path="*" element={<NotFound />}/>
       </Routes>
     </>
   );
@@ -295,11 +388,13 @@ function AppShell() {
 
 function App() {
   return (
-    <CartProvider>
-      <BrowserRouter>
-        <AppShell />
-      </BrowserRouter>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

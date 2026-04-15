@@ -125,6 +125,57 @@ button { font: inherit; cursor: pointer; }
   border-color: var(--text-muted);
 }
 
+.nav-login-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-login-link:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.nav-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-profile-link:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.nav-profile-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-profile-avatar--img {
+  object-fit: cover;
+  background: none;
+}
+
 .navbar--reservation {
   background: #ffffff;
   border-bottom-color: #bb2233;

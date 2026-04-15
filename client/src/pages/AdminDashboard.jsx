@@ -1,46 +1,75 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 import './AdminDashboard.css';
 import { clearAdminToken } from '../utils/adminAuth';
 import { normalizeApiError, parseApiResponse } from '../utils/api';
 
-const ORDER_STATUS_COLUMNS = ["pending", "confirmed", "preparing", "ready"];
-const ORDER_STATUSES = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"];
-const RESERVATION_STATUSES = ["pending", "confirmed", "cancelled"];
-const RESERVATION_TYPES = ["standard", "kaiseki", "omakase", "prix-fixe", "private-event"];
+const TODAY = new Date().toISOString().slice(0, 10);
+const THIRTY_DAYS_AGO = (() => {
+  const d = new Date();
+  d.setDate(d.getDate() - 30);
+  return d.toISOString().slice(0, 10);
+})();
+
+const ORDER_STATUS_COLUMNS = ['pending', 'confirmed', 'preparing', 'ready'];
+const ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled'];
+const RESERVATION_STATUSES = ['pending', 'confirmed', 'cancelled'];
+const RESERVATION_TYPES = ['standard', 'kaiseki', 'omakase', 'prix-fixe', 'private-event'];
 
 const STATUS_LABELS = {
-  pending: "Pending",
-  confirmed: "Confirmed",
-  preparing: "Preparing",
-  ready: "Ready",
-  completed: "Completed",
-  cancelled: "Cancelled"
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  preparing: 'Preparing',
+  ready: 'Ready',
+  completed: 'Completed',
+  cancelled: 'Cancelled'
+};
+
+const STATUS_COLORS = {
+  pending: '#ffd966',
+  confirmed: '#66b2ff',
+  preparing: '#ff9933',
+  ready: '#66ff99',
+  completed: '#aaa',
+  cancelled: '#ff6666'
 };
 
 const NEXT_STATUS = {
-  pending: "confirmed",
-  confirmed: "preparing",
-  preparing: "ready",
-  ready: "completed"
+  pending: 'confirmed',
+  confirmed: 'preparing',
+  preparing: 'ready',
+  ready: 'completed'
 };
 
 function getToken() {
   return localStorage.getItem('token');
 }
 
+function parseItems(items) {
+  return Array.isArray(items) ? items : [];
+}
+
 function formatReservationType(type) {
-  return String(type || "")
-    .split("-")
+  return String(type || '')
+    .split('-')
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+    .join(' ');
 }
 
 function formatReservationTime(time) {
-  const [hours = "00", minutes = "00"] = String(time || "").split(":");
+  const [hours = '00', minutes = '00'] = String(time || '').split(':');
   const date = new Date();
   date.setHours(Number(hours), Number(minutes), 0, 0);
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
 function buildAdminTimeSlots(dateString) {
@@ -55,8 +84,8 @@ function buildAdminTimeSlots(dateString) {
       slotDate.setHours(hour, minute, 0, 0);
 
       slots.push({
-        value: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`,
-        label: slotDate.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+        value: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`,
+        label: slotDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
       });
     }
   }
@@ -67,6 +96,7 @@ function buildAdminTimeSlots(dateString) {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState('orders');
+
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [ordersLoading, setOrdersLoading] = useState(true);
@@ -80,23 +110,29 @@ export default function AdminDashboard() {
   const [updatingReservation, setUpdatingReservation] = useState(false);
   const [reservationFilters, setReservationFilters] = useState({ date: '', status: '' });
   const [reservationForm, setReservationForm] = useState({
-    date: "",
-    time: "",
-    partySize: "2",
-    status: "pending",
+    date: '',
+    time: '',
+    partySize: '2',
+    status: 'pending',
     type: 'standard'
   });
+
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState(null);
+  const [dateStart, setDateStart] = useState(THIRTY_DAYS_AGO);
+  const [dateEnd, setDateEnd] = useState(TODAY);
 
   const redirectToAdminLogin = useCallback((message = 'Your admin session expired. Please sign in again.') => {
     clearAdminToken();
     navigate('/admin/login', { replace: true, state: { message } });
   }, [navigate]);
 
-  const normalizeDashboardError = useCallback((message) => normalizeApiError(message, {
-    fallback: 'The admin dashboard could not load data right now.',
+  const normalizeDashboardError = useCallback((message, fallback) => normalizeApiError(message, {
+    fallback,
     unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
     invalidJson: 'The backend returned an invalid response while loading admin data.',
-    unauthorized: 'Your admin session expired. Please sign in again.',
+    unauthorized: 'Your admin session expired. Please sign in again.'
   }), []);
 
   const fetchOrders = useCallback(async () => {
@@ -111,16 +147,17 @@ export default function AdminDashboard() {
         fallback: 'Failed to load orders.',
         unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
         invalidJson: 'The backend returned invalid JSON while loading orders.',
-        unauthorized: 'Your admin session expired. Please sign in again.',
+        unauthorized: 'Your admin session expired. Please sign in again.'
       });
-      setOrders(data);
+
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
-        redirectToAdminLogin(normalizeDashboardError(err.message));
+        redirectToAdminLogin(normalizeDashboardError(err.message, 'Your admin session expired. Please sign in again.'));
         return;
       }
 
-      setOrdersError(normalizeDashboardError(err.message));
+      setOrdersError(normalizeDashboardError(err.message, 'The admin dashboard could not load orders right now.'));
     } finally {
       setOrdersLoading(false);
     }
@@ -131,10 +168,11 @@ export default function AdminDashboard() {
       setReservationsLoading(true);
       setReservationsError(null);
       const params = new URLSearchParams();
-      if (filters.date) params.set("date", filters.date);
-      if (filters.status) params.set("status", filters.status);
+      if (filters.date) params.set('date', filters.date);
+      if (filters.status) params.set('status', filters.status);
 
-      const res = await fetch(`/api/reservations/admin?${params.toString()}`, {
+      const query = params.toString();
+      const res = await fetch(query ? `/api/reservations/admin?${query}` : '/api/reservations/admin', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
 
@@ -142,28 +180,67 @@ export default function AdminDashboard() {
         fallback: 'Failed to load reservations.',
         unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
         invalidJson: 'The backend returned invalid JSON while loading reservations.',
-        unauthorized: 'Your admin session expired. Please sign in again.',
+        unauthorized: 'Your admin session expired. Please sign in again.'
       });
+
       setReservations(Array.isArray(data.reservations) ? data.reservations : []);
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
-        redirectToAdminLogin(normalizeDashboardError(err.message));
+        redirectToAdminLogin(normalizeDashboardError(err.message, 'Your admin session expired. Please sign in again.'));
         return;
       }
 
-      setReservationsError(normalizeDashboardError(err.message));
+      setReservationsError(normalizeDashboardError(err.message, 'The admin dashboard could not load reservations right now.'));
     } finally {
       setReservationsLoading(false);
     }
   }, [normalizeDashboardError, redirectToAdminLogin, reservationFilters]);
 
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+  const fetchAnalytics = useCallback(async (start, end) => {
+    try {
+      setAnalyticsLoading(true);
+      setAnalyticsError(null);
+      const res = await fetch(`/api/admin/analytics?start=${start}&end=${end}`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+
+      const data = await parseApiResponse(res, {
+        fallback: 'Failed to load analytics.',
+        unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+        invalidJson: 'The backend returned invalid JSON while loading analytics.',
+        unauthorized: 'Your admin session expired. Please sign in again.'
+      });
+
+      setAnalytics(data);
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        redirectToAdminLogin(normalizeDashboardError(err.message, 'Your admin session expired. Please sign in again.'));
+        return;
+      }
+
+      setAnalyticsError(normalizeDashboardError(err.message, 'The admin dashboard could not load analytics right now.'));
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  }, [normalizeDashboardError, redirectToAdminLogin]);
 
   useEffect(() => {
+    fetchOrders();
     fetchReservations(reservationFilters);
-  }, [fetchReservations, reservationFilters]);
+
+    const interval = setInterval(() => {
+      fetchOrders();
+      fetchReservations(reservationFilters);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [fetchOrders, fetchReservations, reservationFilters]);
+
+  useEffect(() => {
+    if (activeView === 'analytics' && !analytics && !analyticsLoading) {
+      fetchAnalytics(dateStart, dateEnd);
+    }
+  }, [activeView, analytics, analyticsLoading, dateStart, dateEnd, fetchAnalytics]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
     setUpdatingOrder(orderId);
@@ -181,22 +258,23 @@ export default function AdminDashboard() {
         fallback: 'Update failed.',
         unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
         invalidJson: 'The backend returned invalid JSON while updating an order.',
-        unauthorized: 'Your admin session expired. Please sign in again.',
+        unauthorized: 'Your admin session expired. Please sign in again.'
       });
 
-      setOrders(prev =>
-        prev.map(order => order.order_id === orderId ? { ...order, status: newStatus } : order)
-      );
+      setOrders(prev => prev.map(order => (
+        order.order_id === orderId ? { ...order, status: newStatus } : order
+      )));
+
       if (selectedOrder?.order_id === orderId) {
         setSelectedOrder(prev => ({ ...prev, status: newStatus }));
       }
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
-        redirectToAdminLogin(normalizeDashboardError(err.message));
+        redirectToAdminLogin(normalizeDashboardError(err.message, 'Your admin session expired. Please sign in again.'));
         return;
       }
 
-      alert(`Error: ${normalizeDashboardError(err.message)}`);
+      alert(`Error: ${normalizeDashboardError(err.message, 'The order could not be updated right now.')}`);
     } finally {
       setUpdatingOrder(null);
     }
@@ -222,7 +300,7 @@ export default function AdminDashboard() {
     setReservationForm(prev => ({
       ...prev,
       date: value,
-      time: nextSlots.find(slot => slot.value === prev.time)?.value || nextSlots[0]?.value || ""
+      time: nextSlots.find(slot => slot.value === prev.time)?.value || nextSlots[0]?.value || ''
     }));
   };
 
@@ -250,21 +328,21 @@ export default function AdminDashboard() {
         fallback: 'Failed to update reservation.',
         unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
         invalidJson: 'The backend returned invalid JSON while updating a reservation.',
-        unauthorized: 'Your admin session expired. Please sign in again.',
+        unauthorized: 'Your admin session expired. Please sign in again.'
       });
 
       setSelectedReservation(data.reservation);
-      setReservations(prev =>
-        prev.map(reservation => reservation.id === data.reservation.id ? data.reservation : reservation)
-      );
+      setReservations(prev => prev.map(reservation => (
+        reservation.id === data.reservation.id ? data.reservation : reservation
+      )));
       await fetchReservations();
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
-        redirectToAdminLogin(normalizeDashboardError(err.message));
+        redirectToAdminLogin(normalizeDashboardError(err.message, 'Your admin session expired. Please sign in again.'));
         return;
       }
 
-      alert(`Error: ${normalizeDashboardError(err.message)}`);
+      alert(`Error: ${normalizeDashboardError(err.message, 'The reservation could not be updated right now.')}`);
     } finally {
       setUpdatingReservation(false);
     }
@@ -283,7 +361,7 @@ export default function AdminDashboard() {
           date: reservation.date,
           time: reservation.time,
           party_size: reservation.party_size,
-          status: "confirmed",
+          status: 'confirmed',
           type: reservation.type
         })
       });
@@ -292,21 +370,23 @@ export default function AdminDashboard() {
         fallback: 'Failed to confirm reservation.',
         unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
         invalidJson: 'The backend returned invalid JSON while confirming a reservation.',
-        unauthorized: 'Your admin session expired. Please sign in again.',
+        unauthorized: 'Your admin session expired. Please sign in again.'
       });
-      setReservations(prev =>
-        prev.map(item => item.id === data.reservation.id ? data.reservation : item)
-      );
+
+      setReservations(prev => prev.map(item => (
+        item.id === data.reservation.id ? data.reservation : item
+      )));
+
       if (selectedReservation?.id === data.reservation.id) {
         setSelectedReservation(data.reservation);
       }
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
-        redirectToAdminLogin(normalizeDashboardError(err.message));
+        redirectToAdminLogin(normalizeDashboardError(err.message, 'Your admin session expired. Please sign in again.'));
         return;
       }
 
-      alert(`Error: ${normalizeDashboardError(err.message)}`);
+      alert(`Error: ${normalizeDashboardError(err.message, 'The reservation could not be confirmed right now.')}`);
     } finally {
       setUpdatingReservation(false);
     }
@@ -325,7 +405,7 @@ export default function AdminDashboard() {
           date: reservation.date,
           time: reservation.time,
           party_size: reservation.party_size,
-          status: "cancelled",
+          status: 'cancelled',
           type: reservation.type
         })
       });
@@ -334,38 +414,39 @@ export default function AdminDashboard() {
         fallback: 'Failed to cancel reservation.',
         unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
         invalidJson: 'The backend returned invalid JSON while cancelling a reservation.',
-        unauthorized: 'Your admin session expired. Please sign in again.',
+        unauthorized: 'Your admin session expired. Please sign in again.'
       });
-      setReservations(prev =>
-        prev.map(item => item.id === data.reservation.id ? data.reservation : item)
-      );
+
+      setReservations(prev => prev.map(item => (
+        item.id === data.reservation.id ? data.reservation : item
+      )));
+
       if (selectedReservation?.id === data.reservation.id) {
         setSelectedReservation(data.reservation);
       }
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
-        redirectToAdminLogin(normalizeDashboardError(err.message));
+        redirectToAdminLogin(normalizeDashboardError(err.message, 'Your admin session expired. Please sign in again.'));
         return;
       }
 
-      alert(`Error: ${normalizeDashboardError(err.message)}`);
+      alert(`Error: ${normalizeDashboardError(err.message, 'The reservation could not be cancelled right now.')}`);
     } finally {
       setUpdatingReservation(false);
     }
   };
 
-  const ordersByStatus = (status) => orders.filter(order => order.status === status);
-  const parseItems = (items) => Array.isArray(items) ? items : [];
+  const ordersByStatus = status => orders.filter(order => order.status === status);
 
   const renderOrdersView = () => {
-    if (ordersLoading) return <div className="ad-loading">Loading orders…</div>;
-    if (ordersError) return <div className="ad-error">⚠ {ordersError}</div>;
+    if (ordersLoading) return <div className="ad-loading">Loading orders...</div>;
+    if (ordersError) return <div className="ad-error">{ordersError}</div>;
 
     return (
       <>
         <div className="ad-header-right">
           <span className="ad-order-count">{orders.length} total orders</span>
-          <button className="ad-refresh-btn" onClick={fetchOrders}>↻ Refresh</button>
+          <button className="ad-refresh-btn" onClick={fetchOrders}>Refresh</button>
         </div>
 
         <div className="ad-board">
@@ -397,7 +478,7 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                     <div className="ad-card-time">
-                      {new Date(order.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </button>
                 ))}
@@ -410,8 +491,8 @@ export default function AdminDashboard() {
   };
 
   const renderReservationsView = () => {
-    if (reservationsLoading) return <div className="ad-loading">Loading reservations…</div>;
-    if (reservationsError) return <div className="ad-error">⚠ {reservationsError}</div>;
+    if (reservationsLoading) return <div className="ad-loading">Loading reservations...</div>;
+    if (reservationsError) return <div className="ad-error">{reservationsError}</div>;
 
     return (
       <>
@@ -422,14 +503,14 @@ export default function AdminDashboard() {
               <input
                 type="date"
                 value={reservationFilters.date}
-                onChange={event => handleReservationFilterChange("date", event.target.value)}
+                onChange={event => handleReservationFilterChange('date', event.target.value)}
               />
             </label>
             <label className="ad-res-filter">
               <span>Status</span>
               <select
                 value={reservationFilters.status}
-                onChange={event => handleReservationFilterChange("status", event.target.value)}
+                onChange={event => handleReservationFilterChange('status', event.target.value)}
               >
                 <option value="">All statuses</option>
                 {RESERVATION_STATUSES.map(status => (
@@ -440,7 +521,7 @@ export default function AdminDashboard() {
           </div>
           <div className="ad-header-right">
             <span className="ad-order-count">{reservations.length} reservations</span>
-            <button className="ad-refresh-btn" onClick={() => fetchReservations()}>↻ Refresh</button>
+            <button className="ad-refresh-btn" onClick={() => fetchReservations()}>Refresh</button>
           </div>
         </div>
 
@@ -487,22 +568,19 @@ export default function AdminDashboard() {
               </div>
 
               <div className="ad-res-actions">
-                <button
-                  className="ad-status-btn"
-                  onClick={() => openReservationModal(reservation)}
-                >
+                <button className="ad-status-btn" onClick={() => openReservationModal(reservation)}>
                   Modify
                 </button>
                 <button
                   className="ad-status-btn is-current"
-                  disabled={updatingReservation || reservation.status === "confirmed" || reservation.status === "cancelled"}
+                  disabled={updatingReservation || reservation.status === 'confirmed' || reservation.status === 'cancelled'}
                   onClick={() => confirmReservation(reservation)}
                 >
                   Confirm
                 </button>
                 <button
                   className="ad-status-btn ad-status-btn-danger"
-                  disabled={updatingReservation || reservation.status === "cancelled"}
+                  disabled={updatingReservation || reservation.status === 'cancelled'}
                   onClick={() => cancelReservation(reservation)}
                 >
                   Cancel
@@ -515,6 +593,165 @@ export default function AdminDashboard() {
     );
   };
 
+  const renderAnalyticsView = () => (
+    <div className="ad-analytics">
+      <div className="an-date-bar">
+        <label className="an-date-label">
+          From
+          <input
+            type="date"
+            className="an-date-input"
+            value={dateStart}
+            max={dateEnd}
+            onChange={event => setDateStart(event.target.value)}
+          />
+        </label>
+        <label className="an-date-label">
+          To
+          <input
+            type="date"
+            className="an-date-input"
+            value={dateEnd}
+            min={dateStart}
+            max={TODAY}
+            onChange={event => setDateEnd(event.target.value)}
+          />
+        </label>
+        <button
+          className="ad-refresh-btn"
+          onClick={() => fetchAnalytics(dateStart, dateEnd)}
+          disabled={analyticsLoading}
+        >
+          {analyticsLoading ? 'Loading...' : 'Apply'}
+        </button>
+      </div>
+
+      {analyticsError && <div className="ad-error">{analyticsError}</div>}
+
+      {analytics && !analyticsLoading && (
+        <>
+          <div className="an-stat-grid">
+            <div className="an-stat-card">
+              <span className="an-stat-label">Total Orders</span>
+              <span className="an-stat-value">{analytics.totals.total_orders}</span>
+            </div>
+            <div className="an-stat-card">
+              <span className="an-stat-label">Total Revenue</span>
+              <span className="an-stat-value">${analytics.totals.total_revenue.toFixed(2)}</span>
+            </div>
+            <div className="an-stat-card">
+              <span className="an-stat-label">Avg Order Value</span>
+              <span className="an-stat-value">${analytics.totals.avg_order_value.toFixed(2)}</span>
+            </div>
+            <div className="an-stat-card">
+              <span className="an-stat-label">Completed Revenue</span>
+              <span className="an-stat-value an-stat-green">${analytics.totals.completed_revenue.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="an-section">
+            <h3 className="an-section-title">Orders by Status</h3>
+            <div className="an-status-grid">
+              {ORDER_STATUSES.map(status => {
+                const entry = analytics.orders_by_status.find(row => row.status === status);
+                return (
+                  <div key={status} className="an-status-card" style={{ borderColor: STATUS_COLORS[status] }}>
+                    <span className="an-status-name" style={{ color: STATUS_COLORS[status] }}>
+                      {STATUS_LABELS[status]}
+                    </span>
+                    <span className="an-status-count">{entry ? entry.count : 0}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="an-section">
+            <h3 className="an-section-title">Order Volume by Day</h3>
+            {analytics.orders_by_day.length === 0 ? (
+              <p className="ad-empty">No order data for this range.</p>
+            ) : (
+              <div className="an-chart-wrap">
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart
+                    data={analytics.orders_by_day}
+                    margin={{ top: 8, right: 16, left: 0, bottom: 4 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: '#666', fontSize: 12 }}
+                      tickFormatter={date => {
+                        const [, month, day] = date.split('-');
+                        return `${month}/${day}`;
+                      }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fill: '#666', fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={28}
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(206,1,0,0.08)' }}
+                      contentStyle={{
+                        background: '#111',
+                        border: '1px solid #333',
+                        borderRadius: '6px',
+                        fontSize: '13px'
+                      }}
+                      labelStyle={{ color: '#aaa', marginBottom: '4px' }}
+                      itemStyle={{ color: '#ce0100' }}
+                      formatter={value => [value, 'Orders']}
+                    />
+                    <Bar dataKey="order_count" fill="#ce0100" radius={[4, 4, 0, 0]} maxBarSize={48} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+
+          <div className="an-section">
+            <h3 className="an-section-title">Top Items</h3>
+            {analytics.top_items.length === 0 ? (
+              <p className="ad-empty">No item data for this range.</p>
+            ) : (
+              <table className="an-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Item</th>
+                    <th>Qty Sold</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analytics.top_items.map((item, index) => (
+                    <tr key={index}>
+                      <td className="an-rank">{index + 1}</td>
+                      <td className="an-item-name">{item.item_name}</td>
+                      <td>{item.total_quantity}</td>
+                      <td>{item.order_count}</td>
+                      <td>${item.total_revenue.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
+      )}
+
+      {analyticsLoading && (
+        <div className="ad-loading">Loading analytics...</div>
+      )}
+    </div>
+  );
+
   return (
     <div className="ad-shell">
       <header className="ad-header">
@@ -524,26 +761,34 @@ export default function AdminDashboard() {
         </div>
         <div className="ad-view-switch">
           <button
-            className={activeView === "orders" ? "ad-view-tab is-active" : "ad-view-tab"}
-            onClick={() => setActiveView("orders")}
+            className={activeView === 'orders' ? 'ad-view-tab is-active' : 'ad-view-tab'}
+            onClick={() => setActiveView('orders')}
           >
             Orders
           </button>
           <button
-            className={activeView === "reservations" ? "ad-view-tab is-active" : "ad-view-tab"}
-            onClick={() => setActiveView("reservations")}
+            className={activeView === 'reservations' ? 'ad-view-tab is-active' : 'ad-view-tab'}
+            onClick={() => setActiveView('reservations')}
           >
             Reservations
+          </button>
+          <button
+            className={activeView === 'analytics' ? 'ad-view-tab is-active' : 'ad-view-tab'}
+            onClick={() => setActiveView('analytics')}
+          >
+            Analytics
           </button>
         </div>
       </header>
 
-      {activeView === "orders" ? renderOrdersView() : renderReservationsView()}
+      {activeView === 'orders' && renderOrdersView()}
+      {activeView === 'reservations' && renderReservationsView()}
+      {activeView === 'analytics' && renderAnalyticsView()}
 
       {selectedOrder && (
         <div className="ad-overlay" onClick={() => setSelectedOrder(null)}>
           <div className="ad-modal" onClick={event => event.stopPropagation()}>
-            <button className="ad-modal-close" onClick={() => setSelectedOrder(null)}>✕</button>
+            <button className="ad-modal-close" onClick={() => setSelectedOrder(null)}>x</button>
 
             <div className="ad-modal-header">
               <div>
@@ -562,7 +807,7 @@ export default function AdminDashboard() {
               </div>
               <div className="ad-detail-block">
                 <span className="ad-detail-label">Email</span>
-                <span className="ad-detail-value">{selectedOrder.customer_email || "—"}</span>
+                <span className="ad-detail-value">{selectedOrder.customer_email || '-'}</span>
               </div>
               <div className="ad-detail-block">
                 <span className="ad-detail-label">Total</span>
@@ -599,17 +844,17 @@ export default function AdminDashboard() {
                 {ORDER_STATUSES.map(status => (
                   <button
                     key={status}
-                    className={`ad-status-btn ${selectedOrder.status === status ? "is-current" : ""}`}
+                    className={`ad-status-btn ${selectedOrder.status === status ? 'is-current' : ''}`}
                     disabled={
                       selectedOrder.status === status ||
                       updatingOrder === selectedOrder.order_id ||
-                      selectedOrder.status === "completed" ||
-                      selectedOrder.status === "cancelled"
+                      selectedOrder.status === 'completed' ||
+                      selectedOrder.status === 'cancelled'
                     }
                     onClick={() => updateOrderStatus(selectedOrder.order_id, status)}
                   >
                     {updatingOrder === selectedOrder.order_id && status === NEXT_STATUS[selectedOrder.status]
-                      ? "Updating…"
+                      ? 'Updating...'
                       : STATUS_LABELS[status]}
                   </button>
                 ))}
@@ -621,8 +866,8 @@ export default function AdminDashboard() {
                   onClick={() => updateOrderStatus(selectedOrder.order_id, NEXT_STATUS[selectedOrder.status])}
                 >
                   {updatingOrder === selectedOrder.order_id
-                    ? "Updating…"
-                    : `→ Move to ${STATUS_LABELS[NEXT_STATUS[selectedOrder.status]]}`}
+                    ? 'Updating...'
+                    : `-> Move to ${STATUS_LABELS[NEXT_STATUS[selectedOrder.status]]}`}
                 </button>
               )}
             </div>
@@ -633,7 +878,7 @@ export default function AdminDashboard() {
       {selectedReservation && (
         <div className="ad-overlay" onClick={() => setSelectedReservation(null)}>
           <div className="ad-modal" onClick={event => event.stopPropagation()}>
-            <button className="ad-modal-close" onClick={() => setSelectedReservation(null)}>✕</button>
+            <button className="ad-modal-close" onClick={() => setSelectedReservation(null)}>x</button>
 
             <div className="ad-modal-header">
               <div>
@@ -691,7 +936,7 @@ export default function AdminDashboard() {
                   onChange={event => setReservationForm(prev => ({ ...prev, partySize: event.target.value }))}
                 >
                   {Array.from({ length: 12 }, (_, index) => index + 1).map(size => (
-                    <option key={size} value={size}>{size} {size === 1 ? "guest" : "guests"}</option>
+                    <option key={size} value={size}>{size} {size === 1 ? 'guest' : 'guests'}</option>
                   ))}
                 </select>
               </label>
@@ -741,18 +986,18 @@ export default function AdminDashboard() {
                   disabled={updatingReservation}
                   onClick={handleSaveReservation}
                 >
-                  {updatingReservation ? "Saving…" : "Save Changes"}
+                  {updatingReservation ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
                   className="ad-status-btn"
-                  disabled={updatingReservation || selectedReservation.status === "confirmed" || reservationForm.status === "cancelled"}
+                  disabled={updatingReservation || selectedReservation.status === 'confirmed' || reservationForm.status === 'cancelled'}
                   onClick={() => confirmReservation(selectedReservation)}
                 >
                   Confirm
                 </button>
                 <button
                   className="ad-status-btn ad-status-btn-danger"
-                  disabled={updatingReservation || selectedReservation.status === "cancelled"}
+                  disabled={updatingReservation || selectedReservation.status === 'cancelled'}
                   onClick={() => cancelReservation(selectedReservation)}
                 >
                   Cancel

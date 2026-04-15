@@ -1,0 +1,209 @@
+
+header {
+    background: #000000;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px 0;
+}
+
+.contact-grid {
+    display: grid;
+    place-items: center;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* Contact Info */
+.contact-info {
+    background: rgb(22, 22, 22);
+    color: white;
+    border: 1px solid #ce0100;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(255, 255, 255, 0.1);
+}
+
+.contact-info h2 {
+    text-align: center;
+    margin-top: 0;
+    color: white;
+}
+
+.info-item {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.send-button {
+    margin: 15px 0;
+}
+
+/* Form */
+.contact-form {
+    background: rgb(22, 22, 22);
+    color: white;
+    border: 1px solid #ce0100;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ce0100;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.contact-form button {
+    background: #ce0100;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.contact-form button:hover {
+    text-align: center;
+    background: #810000;
+}
+
+.map-wrapper {
+    padding: 5px;
+    /* spacing OUTSIDE */
+}
+
+/* Map */
+.map {
+    margin-top: 30px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.map iframe {
+    width: 100%;
+    height: 300px;
+    border: 0;
+}
+
+/* Success Message */
+.success {
+    color: rgb(9, 223, 9);
+    font-weight: bold;
+}
+
+/* Responsive */
+@media(max-width:768px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.required-label::after {
+    content: "*";
+    /* Adds a space and the asterisk after the label text */
+    color: red;
+    /* Makes the asterisk red */
+    margin-left: 4px;
+    /* Optional: Adds a little space between the label and the asterisk */
+}
+
+
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Navbar */
+nav {
+    background: black;
+    padding: 5px 40px;
+    border-bottom: 1px solid #ccc;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+
+/* Logo */
+.logo {
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Nav links */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+    display: block;
+}
+
+.nav-links a:hover {
+    background: #a82929;
+    border-radius: 5px;
+}
+
+/* Dropdown */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 40px;
+    left: 0;
+    background: white;
+    list-style: none;
+    min-width: 150px;
+    border-radius: 5px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-menu li a {
+    color: #333;
+    padding: 10px;
+}
+
+.dropdown-menu li a:hover {
+    background: #f2f2f2;
+}
+
+/* Show dropdown */
+.show {
+    display: block;
+}
+

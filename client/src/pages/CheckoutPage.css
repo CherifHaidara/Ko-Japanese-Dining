@@ -489,3 +489,21 @@
   border-top: 1px solid var(--border);
   margin-top: 4px;
 }
+
+.confirmation-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirmation-menu-link {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.confirmation-menu-link:hover {
+  color: var(--text);
+}

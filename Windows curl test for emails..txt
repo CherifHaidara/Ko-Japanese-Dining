@@ -1,0 +1,5 @@
+Windows curl test for emails. 
+curl -X POST http://localhost:5050/api/contact -H "Content-Type: application/json" -d "{\"name\":\"test\",\"email\":\"test@test.com\",\"phone\":\"123\",\"subject\":\"general\",\"message\":\"hello\"}"
+
+
+curl -X POST http://localhost:5050/api/checkout -H "Content-Type: application/json" -d "{\"name\":\"test\",\"email\":\"ash@umbc.edu\",\"pickup\":\"12:45\"}"

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import './CheckoutPage.css';
 import { normalizeApiError, parseApiResponse } from '../utils/api';
 
@@ -39,6 +40,7 @@ function formatExpiry(val) {
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
   const pickupTimes = useMemo(() => generatePickupTimes(), []);
 
   const tax        = totalPrice * TAX_RATE;
@@ -81,6 +83,7 @@ export default function CheckoutPage() {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          customer_id:    user?.id || null,
           customer_name:  form.name,
           customer_email: form.email,
           notes:          `Pickup at ${form.pickupTime}${form.instructions ? '. ' + form.instructions : ''}`,
@@ -92,7 +95,6 @@ export default function CheckoutPage() {
           })),
         }),
       });
-
       const data = await parseApiResponse(response, CHECKOUT_ERROR_OPTIONS);
 
       setOrderId(data.order_id);
@@ -104,8 +106,24 @@ export default function CheckoutPage() {
         tax,
         total:      orderTotal,
       });
+      // Attempt confirmation email — non-blocking, order completes regardless
+      try {
+        await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            pickup: form.pickupTime,
+          }),
+        });
+      } catch (e) {
+        console.warn('Confirmation email failed:', e.message);
+      }
+
       clearCart();
       setSubmitted(true);
+
     } catch (err) {
       setError(normalizeApiError(err.message, CHECKOUT_ERROR_OPTIONS));
     } finally {
@@ -120,7 +138,7 @@ export default function CheckoutPage() {
           <div className="checkout-success-icon">🛒</div>
           <h2>Your cart is empty</h2>
           <p>Add items from the menu before checking out.</p>
-          <Link to="/" className="checkout-success-btn">Browse Menu</Link>
+          <Link to="/japanese-menu" className="checkout-success-btn">Browse Menu</Link>
         </div>
       </div>
     );
@@ -179,7 +197,10 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <Link to="/" className="checkout-success-btn">Back to Menu</Link>
+          <div className="confirmation-actions">
+            <Link to={`/order/${orderId}`} className="checkout-success-btn">Track Order</Link>
+            <Link to="/japanese-menu" className="confirmation-menu-link">Back to Menu</Link>
+          </div>
         </div>
       </div>
     );
@@ -187,7 +208,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="checkout-shell">
-      <Link to="/" className="checkout-back">← Back to Menu</Link>
+      <Link to="/japanese-menu" className="checkout-back">← Back to Menu</Link>
       <h1 className="checkout-heading">Checkout</h1>
       <p className="checkout-subheading">Review your order and complete your details below.</p>
 

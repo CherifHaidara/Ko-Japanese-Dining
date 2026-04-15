@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS orders (
     updated_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
                                   ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (order_id),
-    CONSTRAINT fk_order_customer
-        FOREIGN KEY (customer_id) REFERENCES users (user_id)
-        ON DELETE SET NULL
+    -- CONSTRAINT fk_order_customer
+    --     FOREIGN KEY (customer_id) REFERENCES users (user_id)
+    --     ON DELETE SET NULL
 );
 
 -- Stores each individual item within an order.
@@ -59,10 +59,10 @@ CREATE TABLE IF NOT EXISTS order_items (
 
 -- ── Seed Data ────────────────────────────────────────────────────────────────
 
-INSERT INTO orders (customer_name, customer_email, total, status) VALUES
-    ('Alice Chen',  'alice@example.com',  22.00, 'pending'),
-    ('Marcus Lee',  'marcus@example.com', 19.00, 'confirmed'),
-    ('Sara Kim',    'sara@example.com',   38.00, 'ready');
+INSERT INTO orders (customer_id, customer_name, customer_email, total, status) VALUES
+    (1, 'Alice Chen',  'alice@example.com',  22.00, 'pending'),
+    (2, 'Marcus Lee',  'marcus@example.com', 19.00, 'confirmed'),
+    (3, 'Sara Kim',    'sara@example.com',   38.00, 'ready');
 
 INSERT INTO order_items (order_id, item_name, item_price, quantity) VALUES
     (1, 'Tonkotsu Ramen', 17.00, 1),
