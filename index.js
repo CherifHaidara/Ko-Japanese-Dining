@@ -1,3 +1,4 @@
+const loyaltyRoutes = require('./routes/loyalty');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -24,13 +25,24 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 // app.use('/api/reservations', reservationRoutes);
-// app.use('/api/loyalty', loyaltyRoutes);
+app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'Ko Japanese Dining API is running!' });
+});
+
+//Test route
+app.get('/dev/customer-token', (req, res) => {
+  const jwt = require('jsonwebtoken');
+  const token = jwt.sign(
+    { id: 1, name: 'Test User', role: 'customer' },
+    process.env.JWT_SECRET || 'secretkey',
+    { expiresIn: '24h' }
+  );
+  res.json({ token });
 });
 
 // Protected route example

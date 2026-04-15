@@ -96,10 +96,9 @@ router.get("/:id", async (req, res) => {
 // ── PATCH /api/orders/:id/status ─────────────────────────────────────────────
 // Moves an order to a new status stage (admin only)
 router.patch("/:id/status", adminGuard, async (req, res) => {
-  const orderId   = req.params.id;
+  const orderId = req.params.id;
   const { status } = req.body;
 
-  // Validate the incoming status value
   if (!status || !STATUS_FLOW.includes(status)) {
     return res.status(400).json({
       message: `Invalid status. Must be one of: ${STATUS_FLOW.join(", ")}`
@@ -107,7 +106,6 @@ router.patch("/:id/status", adminGuard, async (req, res) => {
   }
 
   try {
-    // Confirm order exists
     const [rows] = await db.query(
       "SELECT * FROM orders WHERE order_id = ?",
       [orderId]
@@ -117,11 +115,11 @@ router.patch("/:id/status", adminGuard, async (req, res) => {
       return res.status(404).json({ message: "Order not found." });
     }
 
-    const currentStatus = rows[0].status;
+    const order = rows[0];
+    const currentStatus = order.status;
 
-    // Prevent moving backwards (except to cancelled which is always allowed)
     const currentIndex = STATUS_FLOW.indexOf(currentStatus);
-    const newIndex     = STATUS_FLOW.indexOf(status);
+    const newIndex = STATUS_FLOW.indexOf(status);
 
     if (status !== "cancelled" && newIndex < currentIndex) {
       return res.status(400).json({
@@ -129,11 +127,20 @@ router.patch("/:id/status", adminGuard, async (req, res) => {
       });
     }
 
-    // Apply the update
     await db.query(
       "UPDATE orders SET status = ? WHERE order_id = ?",
       [status, orderId]
     );
+
+    // Award loyalty points once when order becomes completed
+    if (currentStatus !== "completed" && status === "completed" && order.customer_id) {
+      const pointsEarned = Math.floor(Number(order.total) || 0);
+
+      await db.query(
+        "UPDATE users SET loyalty_points = loyalty_points + ? WHERE user_id = ?",
+        [pointsEarned, order.customer_id]
+      );
+    }
 
     res.json({
       message: `Order #${orderId} status updated to "${status}".`,

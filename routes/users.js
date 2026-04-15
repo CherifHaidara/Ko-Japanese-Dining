@@ -34,7 +34,7 @@ const upload = multer({
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT user_id, first_name, last_name, email, dietary_notes, profile_picture, created_at FROM users WHERE user_id = ?',
+      'SELECT user_id, first_name, last_name, email, dietary_notes, profile_picture, loyalty_points, created_at FROM users WHERE user_id = ?',
       [req.user.id]
     );
 

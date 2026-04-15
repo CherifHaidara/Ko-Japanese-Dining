@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ko Japanese Dining - Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-weight: normal;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #1d1d1d;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .reward {
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #161616;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 10px 16px;
+      background: #e63946;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ff4d5a;
+    }
+
+    #message {
+      margin-bottom: 20px;
+      color: #ffb3b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ko Japanese Dining</h1>
+  <h2>My Account</h2>
+
+  <div id="message"></div>
+
+  <div class="card">
+    <h3>Loyalty Balance</h3>
+    <p id="points">Loading...</p>
+  </div>
+
+  <div class="card">
+    <h3>Rewards Catalog</h3>
+    <div id="rewardsContainer"></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const message = document.getElementById("message");
+    const points = document.getElementById("points");
+    const rewardsContainer = document.getElementById("rewardsContainer");
+
+    async function loadBalance() {
+      try {
+        const res = await fetch("http://localhost:5050/api/loyalty/balance", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          message.textContent = data.message || "Could not load balance.";
+          return;
+        }
+
+        points.textContent = `${data.points} points`;
+      } catch (error) {
+        message.textContent = "Could not connect to the server.";
+      }
+    }
+
+    async function loadRewards() {
+      try {
+        const res = await fetch("http://localhost:5050/api/loyalty/rewards", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          message.textContent = data.message || "Could not load rewards.";
+          return;
+        }
+
+        rewardsContainer.innerHTML = "";
+
+        data.forEach(reward => {
+          const div = document.createElement("div");
+          div.className = "reward";
+          div.innerHTML = `
+            <p><strong>${reward.name}</strong></p>
+            <p>Cost: ${reward.cost} points</p>
+            <button onclick="redeemReward(${reward.id})">Redeem</button>
+          `;
+          rewardsContainer.appendChild(div);
+        });
+      } catch (error) {
+        message.textContent = "Could not connect to the server.";
+      }
+    }
+
+    async function redeemReward(rewardId) {
+      try {
+        const res = await fetch("http://localhost:5050/api/loyalty/redeem", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ rewardId })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          message.textContent = data.message || "Could not redeem reward.";
+          return;
+        }
+
+        message.style.color = "lightgreen";
+        message.textContent = data.message;
+
+        loadBalance();
+      } catch (error) {
+        message.style.color = "#ffb3b8";
+        message.textContent = "Could not connect to the server.";
+      }
+    }
+
+    loadBalance();
+    loadRewards();
+  </script>
+</body>
+</html>
