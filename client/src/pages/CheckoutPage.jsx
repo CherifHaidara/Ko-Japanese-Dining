@@ -3,8 +3,14 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import './CheckoutPage.css';
+import { normalizeApiError, parseApiResponse } from '../utils/api';
 
 const TAX_RATE = 0.0875;
+const CHECKOUT_ERROR_OPTIONS = {
+  fallback: 'Order failed.',
+  unavailable: 'The ordering service is unavailable right now. Make sure the backend server is running on the configured API port and try again.',
+  invalidJson: 'The order endpoint returned an invalid response. Make sure the backend server is running and serving /api/orders.',
+};
 
 function generatePickupTimes() {
   const times = [];
@@ -89,9 +95,7 @@ export default function CheckoutPage() {
           })),
         }),
       });
-      
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Order failed.');
+      const data = await parseApiResponse(response, CHECKOUT_ERROR_OPTIONS);
 
       setOrderId(data.order_id);
       setOrderSnapshot({
@@ -104,24 +108,24 @@ export default function CheckoutPage() {
       });
       // Attempt confirmation email — non-blocking, order completes regardless
       try {
-        await fetch("http://localhost:5050/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name:   form.name,
-            email:  form.email,
+            name: form.name,
+            email: form.email,
             pickup: form.pickupTime,
           }),
         });
       } catch (e) {
-        console.warn("Confirmation email failed:", e.message);
+        console.warn('Confirmation email failed:', e.message);
       }
 
       clearCart();
       setSubmitted(true);
-      
+
     } catch (err) {
-      setError(err.message);
+      setError(normalizeApiError(err.message, CHECKOUT_ERROR_OPTIONS));
     } finally {
       setLoading(false);
     }

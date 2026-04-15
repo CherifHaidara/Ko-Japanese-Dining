@@ -7,6 +7,8 @@ const menuRoutes = require('./routes/menu');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
+const reservationRoutes = require('./routes/reservations');
+const { buildAdminTokenClaims } = require('./auth/adminSession');
 const userRoutes  = require('./routes/users');
 const reviewRoutes = require('./routes/reviews');
 
@@ -26,7 +28,7 @@ app.use('/uploads', require('express').static(require('path').join(__dirname, 'u
 app.use('/api/menu', menuRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
-// app.use('/api/reservations', reservationRoutes);
+app.use('/api/reservations', reservationRoutes);
 // app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
@@ -48,7 +50,7 @@ app.get('/private', authMiddleware, (req, res) => {
 app.get('/dev/admin-token', (req, res) => {
   const jwt = require('jsonwebtoken');
   const token = jwt.sign(
-    { id: 1, name: 'Test Admin', role: 'admin' },
+    buildAdminTokenClaims({ id: 1, name: 'Test Admin' }),
     process.env.JWT_SECRET || 'secretkey',
     { expiresIn: '24h' }
   );
@@ -67,7 +69,7 @@ app.post("/api/contact", async (req, res) => {
         pass: process.env.EMAIL_PASSWORD,
       },
     });
-    
+
     await transporter.sendMail({
       from: email,
       to: process.env.EMAIL,
@@ -85,8 +87,8 @@ app.post("/api/contact", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: err.message
     });
   }
@@ -103,7 +105,7 @@ app.post("/api/checkout", async (req, res) => {
         pass: process.env.EMAIL_PASSWORD,
       },
     });
-    
+
     await transporter.sendMail({
       from: process.env.EMAIL,
       to:  email,
@@ -115,8 +117,8 @@ app.post("/api/checkout", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: err.message
     });
   }

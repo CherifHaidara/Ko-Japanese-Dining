@@ -1,28 +1,19 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
-
-// Reads token from localStorage and checks the role claim
-function parseTokenRole(token) {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.role || null;
-  } catch {
-    return null;
-  }
-}
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { clearAdminToken, getAdminTokenState } from '../utils/adminAuth';
 
 export default function AdminRouteGuard({ children }) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   if (!token) {
     return <Navigate to="/admin/login" replace />;
   }
 
-  const role = parseTokenRole(token);
+  const tokenState = getAdminTokenState(token);
 
-  if (role !== "admin") {
-    localStorage.removeItem("token");
-    return <Navigate to="/admin/login" replace state={{ message: "Admin access required." }} />;
+  if (!tokenState.isValid) {
+    clearAdminToken();
+    return <Navigate to="/admin/login" replace state={{ message: tokenState.message }} />;
   }
 
   return children;

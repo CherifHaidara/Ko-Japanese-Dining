@@ -176,6 +176,61 @@ button { font: inherit; cursor: pointer; }
   background: none;
 }
 
+.navbar--reservation {
+  background: #ffffff;
+  border-bottom-color: #bb2233;
+}
+
+.navbar--reservation .navbar-name {
+  color: #000000;
+}
+
+.navbar--reservation .nav-admin-link {
+  color: #000000;
+  border-color: #bb2233;
+  background: #ffffff;
+}
+
+.navbar--reservation .nav-admin-link:hover {
+  color: #ffffff;
+  background: #bb2233;
+  border-color: #bb2233;
+}
+
+.navbar--reservation .theme-toggle {
+  color: #000000;
+  border-color: #bb2233;
+  background: #ffffff;
+}
+
+.navbar--reservation .theme-toggle:hover {
+  color: #ffffff;
+  background: #bb2233;
+  border-color: #bb2233;
+}
+
+[data-theme="dark"] .navbar--reservation {
+  background: #000000;
+  border-bottom-color: #bb2233;
+}
+
+[data-theme="dark"] .navbar--reservation .navbar-name,
+[data-theme="dark"] .navbar--reservation .nav-admin-link,
+[data-theme="dark"] .navbar--reservation .theme-toggle {
+  color: #ffffff;
+  background: #000000;
+}
+
+[data-theme="dark"] .navbar--reservation .nav-admin-link {
+  border-color: #bb2233;
+}
+
+[data-theme="dark"] .navbar--reservation .nav-admin-link:hover,
+[data-theme="dark"] .navbar--reservation .theme-toggle:hover {
+  background: #bb2233;
+  border-color: #bb2233;
+}
+
 /* ── Page Shell ─────────────────────────────────────────────────────────── */
 .page {
   width: min(1200px, calc(100% - 48px));

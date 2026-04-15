@@ -1,17 +1,19 @@
 import { useMemo, useState, useEffect } from 'react';
 import './App.css';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CheckoutPage from './pages/CheckoutPage';
+import AccountReservationsPage from './pages/AccountReservationsPage';
+import ReservationPage from './pages/ReservationPage';
 import OrderStatusPage from './pages/OrderStatusPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import Cart from './components/Cart';
 import Contact from './pages/Contact';
 import Home from './pages/Home';
-import NotFound from './pages/NotFound'
+import NotFound from './pages/NotFound';
 
 import { CartProvider, useCart } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -53,12 +55,11 @@ function useTheme() {
   return { theme, toggle };
 }
 
-function Navbar({ theme, toggleTheme }) {
-  const [open, setOpen] = useState(false);
-
+function Navbar({ theme, toggleTheme, isReservationPage }) {
   const { user } = useAuth();
+
   return (
-    <nav className="navbar">
+    <nav className={isReservationPage ? 'navbar navbar--reservation' : 'navbar'}>
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
           <img
@@ -70,9 +71,9 @@ function Navbar({ theme, toggleTheme }) {
         </Link>
 
         <div className="navbar-actions">
-
-          
           <Link to="/japanese-menu" className="nav-admin-link">Menu</Link>
+          <Link to="/reservations" className="nav-admin-link">Reserve</Link>
+          <Link to="/account" className="nav-admin-link">My Reservations</Link>
           <Link to="/admin/login" className="nav-admin-link">Admin</Link>
           <Link to="/contact" className="nav-admin-link">Contact</Link>
           {user ? (
@@ -185,6 +186,9 @@ function MenuPage() {
             <button className="btn-primary" onClick={() => document.querySelector('.menu-section')?.scrollIntoView({ behavior: 'smooth' })}>
               Browse Menu
             </button>
+            <Link className="btn-outline" to="/reservations">
+              Reserve a Table
+            </Link>
             <button className="btn-outline" onClick={() => setSelectedTab("Sashimi")}>
               View Sashimi
             </button>
@@ -239,7 +243,7 @@ function MenuPage() {
         {loading ? (
           <div className="menu-loading">Loading menu…</div>
         ) : fetchError ? (
-          <div className="menu-loading">Could not load menu. Make sure the backend server is running on port 5000.</div>
+          <div className="menu-loading">Could not load menu. Make sure the backend server is running on the configured API port.</div>
         ) : (
           <>
             <div className="tabs" role="tablist">
@@ -351,15 +355,21 @@ function MenuPage() {
 
 function AppShell() {
   const { theme, toggle } = useTheme();
+  const location = useLocation();
+  const isReservationPage =
+    location.pathname.startsWith('/reservations') ||
+    location.pathname.startsWith('/account');
 
   return (
     <>
-      <Navbar theme={theme} toggleTheme={toggle} />
+      <Navbar theme={theme} toggleTheme={toggle} isReservationPage={isReservationPage} />
       <Cart />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/japanese-menu" element={<MenuPage />} />
+        <Route path="/reservations" element={<ReservationPage />} />
+        <Route path="/account" element={<AccountReservationsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id" element={<OrderStatusPage />} />
         <Route path="/login" element={<AuthPage defaultTab="login" />} />
