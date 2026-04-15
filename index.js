@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
 const userRoutes  = require('./routes/users');
+const reviewRoutes = require('./routes/reviews');
 
 const app = express();
 const configuredPort = Number(process.env.PORT);
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', require('express').static(require('path').join(__dirname, 'uploads')));
 
+
 // Routes
 app.use('/api/menu', menuRoutes);
 app.use('/api/auth', authRoutes);
@@ -28,6 +30,7 @@ app.use('/api/orders', orderRoutes);
 // app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Test route
 app.get('/', (req, res) => {

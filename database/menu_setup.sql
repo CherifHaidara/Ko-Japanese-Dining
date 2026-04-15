@@ -98,6 +98,19 @@ CREATE TABLE IF NOT EXISTS item_tags (
     CONSTRAINT fk_itemtag_tag  FOREIGN KEY (tag_id)  REFERENCES tags (tag_id)        ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS item_reviews (
+    review_id     INT AUTO_INCREMENT PRIMARY KEY,
+    item_id       INT NOT NULL,
+    user_id       INT NULL,
+    rating        INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment       TEXT,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_review_item
+        FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
+        ON DELETE CASCADE
+);
+
 -- ── Clear existing seed data ─────────────────────────────────────────────────
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE item_tags;
@@ -309,3 +322,76 @@ INSERT INTO menu_items (section_id, name, description, price, is_featured, displ
 SET @b_dr = (SELECT section_id FROM menu_sections WHERE name = 'Drinks' AND category_id = 3);
 INSERT INTO menu_items (section_id, name, description, price, is_featured, display_order) VALUES
 (@b_dr, 'Bottomless Mimosas', 'Add Bottomless Mimosas for 90 minutes. Choice of: Yuzu, Grape, Peach, or Classic Orange', 35.00, TRUE, 1);
+
+
+
+-- CURRENTLY FILES DO EXIST BUT MENU DOESN'T DISPLAY THEM IN APP.JS
+-- Updating for menu images 
+-- UPDATE menu_items SET image_url = '/images/menu/edamame.svg' WHERE name = 'Edamame';
+-- UPDATE menu_items SET image_url = '/images/menu/fried-eggplant-cheese.svg' WHERE name = 'Fried Eggplant Cheese';
+-- UPDATE menu_items SET image_url = '/images/menu/fried-cheese.svg' WHERE name = 'Fried Cheese';
+-- UPDATE menu_items SET image_url = '/images/menu/fried-tofu-agedashi.svg' WHERE name = 'Fried Tofu (Agedashi)';
+-- UPDATE menu_items SET image_url = '/images/menu/garlic-fries.svg' WHERE name = 'Garlic Fries';
+-- UPDATE menu_items SET image_url = '/images/menu/karaage.svg' WHERE name = 'Karaage (Fried Chicken)';
+-- UPDATE menu_items SET image_url = '/images/menu/potato-croquettes.svg' WHERE name = 'Potato Croquettes';
+-- UPDATE menu_items SET image_url = '/images/menu/mince-katsu-beef.svg' WHERE name = 'Mince Katsu (Beef)';
+-- UPDATE menu_items SET image_url = '/images/menu/sliced-tomato-w-miso-sauce.svg' WHERE name = 'Sliced Tomato w/ Miso Sauce';
+-- UPDATE menu_items SET image_url = '/images/menu/omakase-salad.svg' WHERE name = 'Omakase Salad';
+-- UPDATE menu_items SET image_url = '/images/menu/smash-cucumber.svg' WHERE name = 'Smash Cucumber';
+-- UPDATE menu_items SET image_url = '/images/menu/onigiri-ume.svg' WHERE name = 'Onigiri - Ume';
+-- UPDATE menu_items SET image_url = '/images/menu/onigiri-salmon.svg' WHERE name = 'Onigiri - Salmon';
+-- UPDATE menu_items SET image_url = '/images/menu/onigiri-tuna-mayo.svg' WHERE name = 'Onigiri - Tuna Mayo';
+-- UPDATE menu_items SET image_url = '/images/menu/onigiri-pollock-roe.svg' WHERE name = 'Onigiri - Pollock Roe';
+-- UPDATE menu_items SET image_url = '/images/menu/ochazuke-salmon.svg' WHERE name = 'Ochazuke - Salmon';
+-- UPDATE menu_items SET image_url = '/images/menu/ochazuke-ume.svg' WHERE name = 'Ochazuke - Ume';
+-- UPDATE menu_items SET image_url = '/images/menu/ochazuke-pollock-roe.svg' WHERE name = 'Ochazuke - Pollock Roe';
+-- UPDATE menu_items SET image_url = '/images/menu/ochazuke-wasabi.svg' WHERE name = 'Ochazuke - Wasabi';
+-- UPDATE menu_items SET image_url = '/images/menu/yakitamago-rolled-egg.svg' WHERE name = 'Yakitamago (Rolled Egg)';
+-- UPDATE menu_items SET image_url = '/images/menu/chawanmushi-steamed-egg.svg' WHERE name = 'Chawanmushi (Steamed Egg)';
+
+-- UPDATE menu_items SET image_url = '/images/menu/yakisoba.svg' WHERE name = 'Yakisoba';
+-- UPDATE menu_items SET image_url = '/images/menu/yakiudon.svg' WHERE name = 'Yakiudon';
+-- UPDATE menu_items SET image_url = '/images/menu/braised-pork-belly.svg' WHERE name = 'Braised Pork Belly';
+-- UPDATE menu_items SET image_url = '/images/menu/aji-fry-fried-fish.svg' WHERE name = 'Aji Fry (Fried Fish)';
+-- UPDATE menu_items SET image_url = '/images/menu/shiromi-fry-white-fish.svg' WHERE name = 'Shiromi Fry (White Fish)';
+-- UPDATE menu_items SET image_url = '/images/menu/nimono-chicken-carrot-cognac-stew.svg' WHERE name = 'Nimono (Chicken, Carrot, Cognac Stew)';
+
+-- UPDATE menu_items SET image_url = '/images/menu/karaage.svg' WHERE name = 'Karaage';
+-- UPDATE menu_items SET image_url = '/images/menu/tonkatsu.svg' WHERE name = 'Tonkatsu';
+-- UPDATE menu_items SET image_url = '/images/menu/katsudon.svg' WHERE name = 'Katsudon';
+-- UPDATE menu_items SET image_url = '/images/menu/grilled-fish.svg' WHERE name = 'Grilled Fish';
+-- UPDATE menu_items SET image_url = '/images/menu/chicken-teriyaki.svg' WHERE name = 'Chicken Teriyaki';
+-- UPDATE menu_items SET image_url = '/images/menu/mince-katsu.svg' WHERE name = 'Mince Katsu';
+-- UPDATE menu_items SET image_url = '/images/menu/oyakodon.svg' WHERE name = 'Oyakodon';
+-- UPDATE menu_items SET image_url = '/images/menu/chicken-katsu.svg' WHERE name = 'Chicken Katsu';
+-- UPDATE menu_items SET image_url = '/images/menu/shogayaki.svg' WHERE name = 'Shogayaki';
+-- UPDATE menu_items SET image_url = '/images/menu/yakiniku.svg' WHERE name = 'Yakiniku';
+-- UPDATE menu_items SET image_url = '/images/menu/tempura-set.svg' WHERE name = 'Tempura Set';
+-- UPDATE menu_items SET image_url = '/images/menu/tendon.svg' WHERE name = 'Tendon';
+-- UPDATE menu_items SET image_url = '/images/menu/jumbo-fried-shrimp.svg' WHERE name = 'Jumbo Fried Shrimp';
+
+-- UPDATE menu_items SET image_url = '/images/menu/sashimi-set-a.svg' WHERE name = 'Sashimi Set A';
+-- UPDATE menu_items SET image_url = '/images/menu/sashimi-set-b.svg' WHERE name = 'Sashimi Set B';
+
+-- UPDATE menu_items SET image_url = '/images/menu/sushi-set-a.svg' WHERE name = 'Sushi Set A';
+-- UPDATE menu_items SET image_url = '/images/menu/sushi-set-b.svg' WHERE name = 'Sushi Set B';
+-- UPDATE menu_items SET image_url = '/images/menu/california-roll.svg' WHERE name = 'California Roll';
+-- UPDATE menu_items SET image_url = '/images/menu/spicy-tuna-roll.svg' WHERE name = 'Spicy Tuna Roll';
+-- UPDATE menu_items SET image_url = '/images/menu/spicy-salmon-roll.svg' WHERE name = 'Spicy Salmon Roll';
+-- UPDATE menu_items SET image_url = '/images/menu/salmon-roll.svg' WHERE name = 'Salmon Roll';
+-- UPDATE menu_items SET image_url = '/images/menu/shrimp-tempura-roll.svg' WHERE name = 'Shrimp Tempura Roll';
+-- UPDATE menu_items SET image_url = '/images/menu/premium-omakase.svg' WHERE name = 'Premium Omakase';    
+
+-- UPDATE menu_items SET image_url = '/images/menu/matcha-affogato.svg' WHERE name = 'Matcha Affogato';
+-- UPDATE menu_items SET image_url = '/images/menu/mochi-ice-cream.svg' WHERE name = 'Mochi Ice Cream';
+-- UPDATE menu_items SET image_url = '/images/menu/basque-burnt-cheesecake.svg' WHERE name = 'Basque Burnt Cheesecake';
+-- UPDATE menu_items SET image_url = '/images/menu/matcha-chiffon-cake.svg' WHERE name = 'Matcha Chiffon Cake';
+
+-- UPDATE menu_items SET image_url = '/images/menu/katsu-sando.svg' WHERE name = 'Katsu Sando';
+-- UPDATE menu_items SET image_url = '/images/menu/tamago-sando.svg' WHERE name = 'Tamago Sando';
+-- UPDATE menu_items SET image_url = '/images/menu/okonomiyaki.svg' WHERE name = 'Okonomiyaki';
+
+-- UPDATE menu_items SET image_url = '/images/menu/sabazkake.svg' WHERE name = 'Sabazkake';
+-- UPDATE menu_items SET image_url = '/images/menu/katsu-curry-rice.svg' WHERE name = 'Katsu Curry Rice';
+
+-- UPDATE menu_items SET image_url = '/images/menu/bottomless-mimosas.svg' WHERE name = 'Bottomless Mimosas';

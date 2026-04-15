@@ -5,7 +5,12 @@ import "../components/Footer.css";
 function Home() {
   const menuRef = useRef(null);
 
-  
+  const previewItems = [
+    { name: "Karaage", image: "/images/menu/karaage.svg" },
+    { name: "Tonkatsu", image: "/images/menu/tonkatsu.svg" },
+    { name: "Spicy Tuna Roll", image: "/images/menu/spicy-tuna-roll.svg" },
+    { name: "Mochi Ice Cream", image: "/images/menu/mochi-ice-cream.svg" },
+  ];
 
   const toggleMenu = (e) => {
     e.preventDefault();
@@ -46,6 +51,23 @@ function Home() {
         <a href="/japanese-menu" className="button">
           Explore menu
         </a>
+        {/* Menu Preview */}
+          <div className="menu-preview-section">
+            <h3>Popular Dishes</h3>
+
+            <div className="menu-preview-grid">
+              {previewItems.map((item, i) => (
+                <div key={i} className="menu-preview-card">
+                  <img src={item.image} alt={item.name} />
+                  <p>{item.name}</p>
+                </div>
+              ))}
+            </div>
+
+            <a href="/japanese-menu" className="button">
+              View Full Menu
+            </a>
+          </div>
       </div>
 
       {/* Sabai */}
