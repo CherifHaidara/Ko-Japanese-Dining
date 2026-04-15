@@ -1,61 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import './AdminLoginPage.css';
+import { clearAdminToken, getAdminTokenState } from '../utils/adminAuth';
+import { normalizeApiError, parseApiResponse } from '../utils/api';
 
-function parseTokenRole(token) {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.role || null;
-  } catch {
-    return null;
-  }
-}
-
-async function readResponsePayload(response) {
-  const text = await response.text();
-
-  if (!text) {
-    return {};
-  }
-
-  const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('application/json')) {
-    try {
-      return JSON.parse(text);
-    } catch {
-      return { message: 'The server returned invalid JSON while processing admin sign-in.' };
-    }
-  }
-
-  return { message: text };
-}
-
-function normalizeAdminLoginError(errorMessage) {
-  if (!errorMessage) {
-    return 'Unable to verify admin access right now. Please try again.';
-  }
-
-  if (/proxy error/i.test(errorMessage)) {
-    return 'The frontend could not reach the backend API. Make sure the Express server is running on the configured API port.';
-  }
-
-  if (/unexpected end of json input/i.test(errorMessage) || /not valid json/i.test(errorMessage)) {
-    return 'The admin login endpoint did not return valid JSON. Make sure the backend is running and serving /api/auth/admin-login.';
-  }
-
-  return errorMessage;
-}
+const ADMIN_LOGIN_ERROR_OPTIONS = {
+  fallback: 'Unable to verify admin access right now. Please try again.',
+  unavailable: 'The frontend could not reach the backend API. Make sure the Express server is running on the configured API port.',
+  invalidJson: 'The admin login endpoint did not return valid JSON. Make sure the backend is running and serving /api/auth/admin-login.',
+  unauthorized: 'Your admin session expired. Please sign in again.',
+};
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const existingToken = localStorage.getItem('token');
+  const tokenState = useMemo(() => getAdminTokenState(existingToken), [existingToken]);
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(location.state?.message || '');
+  const [error, setError] = useState(location.state?.message || (existingToken && !tokenState.isValid ? tokenState.message : ''));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (existingToken && parseTokenRole(existingToken) === 'admin') {
+  useEffect(() => {
+    if (existingToken && !tokenState.isValid) {
+      clearAdminToken();
+    }
+  }, [existingToken, tokenState.isValid]);
+
+  if (tokenState.isValid) {
     return <Navigate to="/admin" replace />;
   }
 
@@ -74,11 +45,7 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password })
       });
 
-      const data = await readResponsePayload(response);
-
-      if (!response.ok) {
-        throw new Error(normalizeAdminLoginError(data.message));
-      }
+      const data = await parseApiResponse(response, ADMIN_LOGIN_ERROR_OPTIONS);
 
       if (!data.token) {
         throw new Error('Admin authentication succeeded, but no token was returned.');
@@ -87,8 +54,8 @@ export default function AdminLoginPage() {
       localStorage.setItem('token', data.token);
       navigate('/admin', { replace: true });
     } catch (submitError) {
-      localStorage.removeItem('token');
-      setError(normalizeAdminLoginError(submitError.message));
+      clearAdminToken();
+      setError(normalizeApiError(submitError.message, ADMIN_LOGIN_ERROR_OPTIONS));
     } finally {
       setIsSubmitting(false);
     }

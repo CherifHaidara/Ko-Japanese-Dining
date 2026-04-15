@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
-import "./AdminDashboard.css";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './AdminDashboard.css';
+import { clearAdminToken } from '../utils/adminAuth';
+import { normalizeApiError, parseApiResponse } from '../utils/api';
 
 const ORDER_STATUS_COLUMNS = ["pending", "confirmed", "preparing", "ready"];
 const ORDER_STATUSES = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"];
@@ -23,7 +26,7 @@ const NEXT_STATUS = {
 };
 
 function getToken() {
-  return localStorage.getItem("token");
+  return localStorage.getItem('token');
 }
 
 function formatReservationType(type) {
@@ -62,7 +65,8 @@ function buildAdminTimeSlots(dateString) {
 }
 
 export default function AdminDashboard() {
-  const [activeView, setActiveView] = useState("orders");
+  const navigate = useNavigate();
+  const [activeView, setActiveView] = useState('orders');
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [ordersLoading, setOrdersLoading] = useState(true);
@@ -74,31 +78,53 @@ export default function AdminDashboard() {
   const [reservationsLoading, setReservationsLoading] = useState(true);
   const [reservationsError, setReservationsError] = useState(null);
   const [updatingReservation, setUpdatingReservation] = useState(false);
-  const [reservationFilters, setReservationFilters] = useState({ date: "", status: "" });
+  const [reservationFilters, setReservationFilters] = useState({ date: '', status: '' });
   const [reservationForm, setReservationForm] = useState({
     date: "",
     time: "",
     partySize: "2",
     status: "pending",
-    type: "standard"
+    type: 'standard'
   });
+
+  const redirectToAdminLogin = useCallback((message = 'Your admin session expired. Please sign in again.') => {
+    clearAdminToken();
+    navigate('/admin/login', { replace: true, state: { message } });
+  }, [navigate]);
+
+  const normalizeDashboardError = useCallback((message) => normalizeApiError(message, {
+    fallback: 'The admin dashboard could not load data right now.',
+    unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+    invalidJson: 'The backend returned an invalid response while loading admin data.',
+    unauthorized: 'Your admin session expired. Please sign in again.',
+  }), []);
 
   const fetchOrders = useCallback(async () => {
     try {
       setOrdersLoading(true);
       setOrdersError(null);
-      const res = await fetch("/api/orders", {
+      const res = await fetch('/api/orders', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
-      if (!res.ok) throw new Error("Failed to load orders.");
-      const data = await res.json();
+
+      const data = await parseApiResponse(res, {
+        fallback: 'Failed to load orders.',
+        unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+        invalidJson: 'The backend returned invalid JSON while loading orders.',
+        unauthorized: 'Your admin session expired. Please sign in again.',
+      });
       setOrders(data);
     } catch (err) {
-      setOrdersError(err.message);
+      if (err.status === 401 || err.status === 403) {
+        redirectToAdminLogin(normalizeDashboardError(err.message));
+        return;
+      }
+
+      setOrdersError(normalizeDashboardError(err.message));
     } finally {
       setOrdersLoading(false);
     }
-  }, []);
+  }, [normalizeDashboardError, redirectToAdminLogin]);
 
   const fetchReservations = useCallback(async (filters = reservationFilters) => {
     try {
@@ -111,18 +137,25 @@ export default function AdminDashboard() {
       const res = await fetch(`/api/reservations/admin?${params.toString()}`, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to load reservations.");
-      }
-      const data = await res.json();
+
+      const data = await parseApiResponse(res, {
+        fallback: 'Failed to load reservations.',
+        unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+        invalidJson: 'The backend returned invalid JSON while loading reservations.',
+        unauthorized: 'Your admin session expired. Please sign in again.',
+      });
       setReservations(Array.isArray(data.reservations) ? data.reservations : []);
     } catch (err) {
-      setReservationsError(err.message);
+      if (err.status === 401 || err.status === 403) {
+        redirectToAdminLogin(normalizeDashboardError(err.message));
+        return;
+      }
+
+      setReservationsError(normalizeDashboardError(err.message));
     } finally {
       setReservationsLoading(false);
     }
-  }, [reservationFilters]);
+  }, [normalizeDashboardError, redirectToAdminLogin, reservationFilters]);
 
   useEffect(() => {
     fetchOrders();
@@ -136,18 +169,20 @@ export default function AdminDashboard() {
     setUpdatingOrder(orderId);
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken()}`
         },
         body: JSON.stringify({ status: newStatus })
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Update failed.");
-      }
+      await parseApiResponse(res, {
+        fallback: 'Update failed.',
+        unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+        invalidJson: 'The backend returned invalid JSON while updating an order.',
+        unauthorized: 'Your admin session expired. Please sign in again.',
+      });
 
       setOrders(prev =>
         prev.map(order => order.order_id === orderId ? { ...order, status: newStatus } : order)
@@ -156,7 +191,12 @@ export default function AdminDashboard() {
         setSelectedOrder(prev => ({ ...prev, status: newStatus }));
       }
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err.status === 401 || err.status === 403) {
+        redirectToAdminLogin(normalizeDashboardError(err.message));
+        return;
+      }
+
+      alert(`Error: ${normalizeDashboardError(err.message)}`);
     } finally {
       setUpdatingOrder(null);
     }
@@ -192,9 +232,9 @@ export default function AdminDashboard() {
     setUpdatingReservation(true);
     try {
       const res = await fetch(`/api/reservations/${selectedReservation.id}/admin`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken()}`
         },
         body: JSON.stringify({
@@ -206,8 +246,12 @@ export default function AdminDashboard() {
         })
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update reservation.");
+      const data = await parseApiResponse(res, {
+        fallback: 'Failed to update reservation.',
+        unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+        invalidJson: 'The backend returned invalid JSON while updating a reservation.',
+        unauthorized: 'Your admin session expired. Please sign in again.',
+      });
 
       setSelectedReservation(data.reservation);
       setReservations(prev =>
@@ -215,7 +259,12 @@ export default function AdminDashboard() {
       );
       await fetchReservations();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err.status === 401 || err.status === 403) {
+        redirectToAdminLogin(normalizeDashboardError(err.message));
+        return;
+      }
+
+      alert(`Error: ${normalizeDashboardError(err.message)}`);
     } finally {
       setUpdatingReservation(false);
     }
@@ -225,9 +274,9 @@ export default function AdminDashboard() {
     setUpdatingReservation(true);
     try {
       const res = await fetch(`/api/reservations/${reservation.id}/admin`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken()}`
         },
         body: JSON.stringify({
@@ -239,8 +288,12 @@ export default function AdminDashboard() {
         })
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to confirm reservation.");
+      const data = await parseApiResponse(res, {
+        fallback: 'Failed to confirm reservation.',
+        unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+        invalidJson: 'The backend returned invalid JSON while confirming a reservation.',
+        unauthorized: 'Your admin session expired. Please sign in again.',
+      });
       setReservations(prev =>
         prev.map(item => item.id === data.reservation.id ? data.reservation : item)
       );
@@ -248,7 +301,12 @@ export default function AdminDashboard() {
         setSelectedReservation(data.reservation);
       }
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err.status === 401 || err.status === 403) {
+        redirectToAdminLogin(normalizeDashboardError(err.message));
+        return;
+      }
+
+      alert(`Error: ${normalizeDashboardError(err.message)}`);
     } finally {
       setUpdatingReservation(false);
     }
@@ -258,9 +316,9 @@ export default function AdminDashboard() {
     setUpdatingReservation(true);
     try {
       const res = await fetch(`/api/reservations/${reservation.id}/admin`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken()}`
         },
         body: JSON.stringify({
@@ -272,8 +330,12 @@ export default function AdminDashboard() {
         })
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to cancel reservation.");
+      const data = await parseApiResponse(res, {
+        fallback: 'Failed to cancel reservation.',
+        unavailable: 'The dashboard could not reach the backend API. Make sure the Express server is running on the configured API port.',
+        invalidJson: 'The backend returned invalid JSON while cancelling a reservation.',
+        unauthorized: 'Your admin session expired. Please sign in again.',
+      });
       setReservations(prev =>
         prev.map(item => item.id === data.reservation.id ? data.reservation : item)
       );
@@ -281,7 +343,12 @@ export default function AdminDashboard() {
         setSelectedReservation(data.reservation);
       }
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (err.status === 401 || err.status === 403) {
+        redirectToAdminLogin(normalizeDashboardError(err.message));
+        return;
+      }
+
+      alert(`Error: ${normalizeDashboardError(err.message)}`);
     } finally {
       setUpdatingReservation(false);
     }

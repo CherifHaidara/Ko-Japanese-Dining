@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import './AccountReservationsPage.css';
+import { normalizeApiError, parseApiResponse } from '../utils/api';
 
 const STORAGE_KEY = 'ko_last_reservation_email';
 const PARTY_SIZE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const ACCOUNT_RESERVATION_ERROR_OPTIONS = {
+  fallback: 'Failed to load upcoming reservations.',
+  unavailable: 'The reservation service is unavailable right now. Make sure the backend server is running on the configured API port and try again.',
+  invalidJson: 'The reservation endpoint returned an invalid response. Make sure the backend server is running and serving reservation routes.',
+};
 
 function formatDisplayDate(dateString) {
   return new Date(`${dateString}T12:00:00`).toLocaleDateString([], {
@@ -77,18 +83,14 @@ export default function AccountReservationsPage() {
 
     try {
       const response = await fetch(`/api/reservations/upcoming?email=${encodeURIComponent(lookupEmail.trim())}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to load upcoming reservations.');
-      }
+      const data = await parseApiResponse(response, ACCOUNT_RESERVATION_ERROR_OPTIONS);
 
       localStorage.setItem(STORAGE_KEY, lookupEmail.trim().toLowerCase());
       setSubmittedEmail(lookupEmail.trim().toLowerCase());
       setReservations(Array.isArray(data.reservations) ? data.reservations : []);
     } catch (err) {
       setReservations([]);
-      setError(err.message);
+      setError(normalizeApiError(err.message, ACCOUNT_RESERVATION_ERROR_OPTIONS));
     } finally {
       setLoading(false);
     }
@@ -148,16 +150,16 @@ export default function AccountReservationsPage() {
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update reservation.');
-      }
+      const data = await parseApiResponse(response, {
+        ...ACCOUNT_RESERVATION_ERROR_OPTIONS,
+        fallback: 'Failed to update reservation.',
+      });
 
       setEditingReservation(null);
       setSuccessMessage(`Reservation ${data.reservation.confirmation_number} updated successfully.`);
       await fetchReservations(submittedEmail);
     } catch (err) {
-      setError(err.message);
+      setError(normalizeApiError(err.message, ACCOUNT_RESERVATION_ERROR_OPTIONS));
     } finally {
       setActionLoading(false);
     }
@@ -179,15 +181,15 @@ export default function AccountReservationsPage() {
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to cancel reservation.');
-      }
+      const data = await parseApiResponse(response, {
+        ...ACCOUNT_RESERVATION_ERROR_OPTIONS,
+        fallback: 'Failed to cancel reservation.',
+      });
 
       setSuccessMessage(`Reservation ${data.confirmation_number} cancelled successfully.`);
       await fetchReservations(submittedEmail);
     } catch (err) {
-      setError(err.message);
+      setError(normalizeApiError(err.message, ACCOUNT_RESERVATION_ERROR_OPTIONS));
     } finally {
       setActionLoading(false);
     }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './ReservationPage.css';
+import { normalizeApiError, parseApiResponse } from '../utils/api';
 
 const PARTY_SIZES = [
   { value: '1', label: '1 guest' },
@@ -14,6 +15,11 @@ const PARTY_SIZES = [
 ];
 
 const STORAGE_KEY = 'ko_last_reservation_email';
+const RESERVATION_ERROR_OPTIONS = {
+  fallback: 'Reservation request failed.',
+  unavailable: 'The reservation service is unavailable right now. Make sure the backend server is running on the configured API port and try again.',
+  invalidJson: 'The reservation endpoint returned an invalid response. Make sure the backend server is running and serving /api/reservations.',
+};
 
 const RESERVATION_TYPES = [
   {
@@ -159,50 +165,44 @@ export default function ReservationPage() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!isValid) return;
 
     setLoading(true);
     setError('');
 
-    fetch('/api/reservations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        customer_id: null,
-        date: form.date,
-        time: form.time,
-        party_size: form.partySize === '8+' ? 8 : Number(form.partySize),
-        type: form.reservationType,
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        dietary_restrictions: form.dietaryRestrictions,
-        event_notes: form.eventNotes,
-      }),
-    })
-      .then(async response => {
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.message || 'Reservation request failed.');
-        }
-        return data;
-      })
-      .then(data => {
-        localStorage.setItem(STORAGE_KEY, form.email.trim().toLowerCase());
-        setConfirmationNumber(data.confirmation_number);
-        setSubmittedReservation(data.reservation);
-        setSubmitted(true);
-      })
-      .catch(err => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      const response = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer_id: null,
+          date: form.date,
+          time: form.time,
+          party_size: form.partySize === '8+' ? 8 : Number(form.partySize),
+          type: form.reservationType,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          dietary_restrictions: form.dietaryRestrictions,
+          event_notes: form.eventNotes,
+        }),
       });
+
+      const data = await parseApiResponse(response, RESERVATION_ERROR_OPTIONS);
+
+      localStorage.setItem(STORAGE_KEY, form.email.trim().toLowerCase());
+      setConfirmationNumber(data.confirmation_number);
+      setSubmittedReservation(data.reservation);
+      setSubmitted(true);
+    } catch (err) {
+      setError(normalizeApiError(err.message, RESERVATION_ERROR_OPTIONS));
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {

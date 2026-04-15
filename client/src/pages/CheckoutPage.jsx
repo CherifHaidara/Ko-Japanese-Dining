@@ -2,8 +2,14 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './CheckoutPage.css';
+import { normalizeApiError, parseApiResponse } from '../utils/api';
 
 const TAX_RATE = 0.0875;
+const CHECKOUT_ERROR_OPTIONS = {
+  fallback: 'Order failed.',
+  unavailable: 'The ordering service is unavailable right now. Make sure the backend server is running on the configured API port and try again.',
+  invalidJson: 'The order endpoint returned an invalid response. Make sure the backend server is running and serving /api/orders.',
+};
 
 function generatePickupTimes() {
   const times = [];
@@ -87,8 +93,7 @@ export default function CheckoutPage() {
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Order failed.');
+      const data = await parseApiResponse(response, CHECKOUT_ERROR_OPTIONS);
 
       setOrderId(data.order_id);
       setOrderSnapshot({
@@ -102,7 +107,7 @@ export default function CheckoutPage() {
       clearCart();
       setSubmitted(true);
     } catch (err) {
-      setError(err.message);
+      setError(normalizeApiError(err.message, CHECKOUT_ERROR_OPTIONS));
     } finally {
       setLoading(false);
     }
