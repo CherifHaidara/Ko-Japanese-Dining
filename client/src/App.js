@@ -9,6 +9,10 @@ import OrderStatusPage from './pages/OrderStatusPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import Cart from './components/Cart';
+import Contact from './pages/Contact';
+import Home from './pages/Home';
+import NotFound from './pages/NotFound'
+
 import { CartProvider, useCart } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -50,16 +54,27 @@ function useTheme() {
 }
 
 function Navbar({ theme, toggleTheme }) {
+  const [open, setOpen] = useState(false);
+
   const { user } = useAuth();
   return (
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <img src="/Ko_logo.png" alt="Ko Japanese Dining" className="navbar-logo" />
+          <img
+            src="/Ko_logo.png"
+            alt="Ko Japanese Dining"
+            className="navbar-logo"
+          />
           <span className="navbar-name">Ko Japanese Dining</span>
         </Link>
+
         <div className="navbar-actions">
+
+          
+          <Link to="/japanese-menu" className="nav-admin-link">Menu</Link>
           <Link to="/admin/login" className="nav-admin-link">Admin</Link>
+          <Link to="/contact" className="nav-admin-link">Contact</Link>
           {user ? (
             <Link to="/profile" className="nav-profile-link">
               {user.profile_picture ? (
@@ -286,11 +301,12 @@ function AppShell() {
       <Navbar theme={theme} toggleTheme={toggle} />
       <Cart />
       <Routes>
-        <Route path="/" element={<MenuPage />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/japanese-menu" element={<MenuPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id" element={<OrderStatusPage />} />
         <Route path="/login" element={<AuthPage defaultTab="login" />} />
-        <Route path="/signup" element={<AuthPage defaultTab="signup" />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={
@@ -298,6 +314,7 @@ function AppShell() {
             <AdminDashboard />
           </AdminRouteGuard>
         } />
+        <Route path="*" element={<NotFound />}/>
       </Routes>
     </>
   );

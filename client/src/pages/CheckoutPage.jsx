@@ -86,7 +86,7 @@ export default function CheckoutPage() {
           })),
         }),
       });
-
+      
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Order failed.');
 
@@ -99,8 +99,24 @@ export default function CheckoutPage() {
         tax,
         total:      orderTotal,
       });
+      // Attempt confirmation email — non-blocking, order completes regardless
+      try {
+        await fetch("http://localhost:5050/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name:   form.name,
+            email:  form.email,
+            pickup: form.pickupTime,
+          }),
+        });
+      } catch (e) {
+        console.warn("Confirmation email failed:", e.message);
+      }
+
       clearCart();
       setSubmitted(true);
+      
     } catch (err) {
       setError(err.message);
     } finally {
@@ -115,7 +131,7 @@ export default function CheckoutPage() {
           <div className="checkout-success-icon">🛒</div>
           <h2>Your cart is empty</h2>
           <p>Add items from the menu before checking out.</p>
-          <Link to="/" className="checkout-success-btn">Browse Menu</Link>
+          <Link to="/japanese-menu" className="checkout-success-btn">Browse Menu</Link>
         </div>
       </div>
     );
@@ -176,7 +192,7 @@ export default function CheckoutPage() {
 
           <div className="confirmation-actions">
             <Link to={`/order/${orderId}`} className="checkout-success-btn">Track Order</Link>
-            <Link to="/" className="confirmation-menu-link">Back to Menu</Link>
+            <Link to="/japanese-menu" className="confirmation-menu-link">Back to Menu</Link>
           </div>
         </div>
       </div>
@@ -185,7 +201,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="checkout-shell">
-      <Link to="/" className="checkout-back">← Back to Menu</Link>
+      <Link to="/japanese-menu" className="checkout-back">← Back to Menu</Link>
       <h1 className="checkout-heading">Checkout</h1>
       <p className="checkout-subheading">Review your order and complete your details below.</p>
 

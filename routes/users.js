@@ -144,4 +144,52 @@ router.post('/me/avatar', authMiddleware, upload.single('avatar'), async (req, r
   }
 });
 
+// ── PUT /api/users/:id ───────────────────────────────────────────────────────
+// Updates name and preferences for a user by ID.
+// A customer can only update their own profile; admins can update any.
+router.put('/:id', authMiddleware, async (req, res) => {
+  const targetId = parseInt(req.params.id);
+
+  if (req.user.role !== 'admin' && req.user.id !== targetId) {
+    return res.status(403).json({ message: 'You can only update your own profile.' });
+  }
+
+  const { first_name, last_name, dietary_notes } = req.body;
+
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM users WHERE user_id = ?',
+      [targetId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const user = rows[0];
+
+    const updatedFirst = first_name    ?? user.first_name;
+    const updatedLast  = last_name     ?? user.last_name;
+    const updatedNotes = dietary_notes ?? user.dietary_notes;
+
+    await db.query(
+      `UPDATE users SET first_name = ?, last_name = ?, dietary_notes = ? WHERE user_id = ?`,
+      [updatedFirst, updatedLast, updatedNotes, targetId]
+    );
+
+    res.json({
+      message: 'Profile updated successfully.',
+      user: {
+        id:            targetId,
+        first_name:    updatedFirst,
+        last_name:     updatedLast,
+        dietary_notes: updatedNotes,
+      },
+    });
+  } catch (err) {
+    console.error('PUT /api/users/:id error:', err);
+    res.status(500).json({ message: 'Failed to update profile.' });
+  }
+});
+
 module.exports = router;

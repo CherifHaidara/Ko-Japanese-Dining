@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth, getToken } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { authFetch } from '../utils/authFetch';
 import './ProfilePage.css';
 
 function EyeIcon({ visible }) {
@@ -65,7 +66,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
 
-    fetch('/api/users/me', { headers: { Authorization: `Bearer ${getToken()}` } })
+    authFetch('/api/users/me')
       .then(r => r.json())
       .then(data => {
         setProfile(data);
@@ -91,9 +92,9 @@ export default function ProfilePage() {
     formData.append('avatar', file);
 
     try {
-      const res  = await fetch('/api/users/me/avatar', {
+      const res  = await authFetch('/api/users/me/avatar', {
         method:  'POST',
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: {},   // let browser set multipart boundary
         body:    formData,
       });
       const data = await res.json();
@@ -131,10 +132,9 @@ export default function ProfilePage() {
         body.new_password     = form.new_password;
       }
 
-      const res  = await fetch('/api/users/me', {
-        method:  'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body:    JSON.stringify(body),
+      const res  = await authFetch('/api/users/me', {
+        method: 'PATCH',
+        body:   JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
