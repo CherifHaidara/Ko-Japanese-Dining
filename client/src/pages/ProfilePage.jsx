@@ -50,6 +50,8 @@ export default function ProfilePage() {
   const [uploadingPic,  setUploadingPic]  = useState(false);
   const [error,         setError]         = useState('');
   const [success,       setSuccess]       = useState('');
+  const [orders,        setOrders]        = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   const [form, setForm] = useState({
     first_name:       '',
@@ -80,6 +82,12 @@ export default function ProfilePage() {
       })
       .catch(() => setError('Failed to load profile.'))
       .finally(() => setLoading(false));
+
+    authFetch('/api/users/me/orders')
+      .then(r => r.json())
+      .then(data => setOrders(Array.isArray(data) ? data : []))
+      .catch(() => setOrders([]))
+      .finally(() => setOrdersLoading(false));
   }, []);
 
   const handleAvatarChange = async (e) => {
@@ -267,6 +275,49 @@ export default function ProfilePage() {
         </div>
 
       </form>
+
+      {/* ── Order History ── */}
+      <div className="profile-orders">
+        <p className="profile-section-title" style={{ marginBottom: 16 }}>Order History</p>
+
+        {ordersLoading ? (
+          <p className="profile-orders-empty">Loading orders…</p>
+        ) : orders.length === 0 ? (
+          <p className="profile-orders-empty">No orders yet.</p>
+        ) : (
+          orders.map(order => (
+            <div key={order.order_id} className="profile-order-card">
+              <div className="profile-order-header">
+                <div>
+                  <p className="profile-order-num">Order #{order.order_id}</p>
+                  <p className="profile-order-date">
+                    {new Date(order.created_at).toLocaleDateString('en-US', {
+                      month: 'long', day: 'numeric', year: 'numeric'
+                    })}
+                  </p>
+                </div>
+                <div className="profile-order-right">
+                  <span className={`profile-order-status profile-order-status--${order.status}`}>
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </span>
+                  <p className="profile-order-total">${parseFloat(order.total).toFixed(2)}</p>
+                </div>
+              </div>
+              <div className="profile-order-items">
+                {order.items.map((item, i) => (
+                  <p key={i} className="profile-order-item">
+                    {item.item_name} × {item.quantity}
+                    <span>${(parseFloat(item.item_price) * item.quantity).toFixed(2)}</span>
+                  </p>
+                ))}
+              </div>
+              <Link to={`/order/${order.order_id}`} className="profile-order-track">
+                Track order →
+              </Link>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
