@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import './CheckoutPage.css';
 
 const TAX_RATE = 0.0875;
@@ -33,6 +34,7 @@ function formatExpiry(val) {
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
   const pickupTimes = useMemo(() => generatePickupTimes(), []);
 
   const tax        = totalPrice * TAX_RATE;
@@ -75,6 +77,7 @@ export default function CheckoutPage() {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          customer_id:    user?.id || null,
           customer_name:  form.name,
           customer_email: form.email,
           notes:          `Pickup at ${form.pickupTime}${form.instructions ? '. ' + form.instructions : ''}`,

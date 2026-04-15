@@ -144,6 +144,37 @@ router.post('/me/avatar', authMiddleware, upload.single('avatar'), async (req, r
   }
 });
 
+// ── GET /api/users/me/orders ─────────────────────────────────────────────────
+// Returns all past orders for the logged-in customer
+router.get('/me/orders', authMiddleware, async (req, res) => {
+  try {
+    const [orders] = await db.query(
+      `SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+
+    if (orders.length === 0) {
+      return res.json([]);
+    }
+
+    const orderIds = orders.map(o => o.order_id);
+    const [items]  = await db.query(
+      `SELECT * FROM order_items WHERE order_id IN (${orderIds.map(() => '?').join(',')})`,
+      orderIds
+    );
+
+    const result = orders.map(order => ({
+      ...order,
+      items: items.filter(i => i.order_id === order.order_id),
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error('GET /api/users/me/orders error:', err);
+    res.status(500).json({ message: 'Failed to fetch order history.' });
+  }
+});
+
 // ── PUT /api/users/:id ───────────────────────────────────────────────────────
 // Updates name and preferences for a user by ID.
 // A customer can only update their own profile; admins can update any.
