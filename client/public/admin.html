@@ -93,7 +93,7 @@
       const token = localStorage.getItem("token");
 
       try {
-        const res = await fetch("http://localhost:5000/api/admin/orders", {
+        const res = await fetch("/api/admin/orders", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

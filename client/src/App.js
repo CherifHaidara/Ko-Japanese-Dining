@@ -186,7 +186,7 @@ function MenuPage() {
         {loading ? (
           <div className="menu-loading">Loading menu…</div>
         ) : fetchError ? (
-          <div className="menu-loading">Could not load menu. Make sure the backend server is running on port 5000.</div>
+          <div className="menu-loading">Could not load menu. Make sure the backend server is running on the configured API port.</div>
         ) : (
           <>
             <div className="tabs" role="tablist">

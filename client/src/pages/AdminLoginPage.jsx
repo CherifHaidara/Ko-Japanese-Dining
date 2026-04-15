@@ -37,7 +37,7 @@ function normalizeAdminLoginError(errorMessage) {
   }
 
   if (/proxy error/i.test(errorMessage)) {
-    return 'The frontend could not reach the backend API. Make sure the Express server is running on port 5050.';
+    return 'The frontend could not reach the backend API. Make sure the Express server is running on the configured API port.';
   }
 
   if (/unexpected end of json input/i.test(errorMessage) || /not valid json/i.test(errorMessage)) {

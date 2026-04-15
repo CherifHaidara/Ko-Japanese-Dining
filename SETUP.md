@@ -44,7 +44,7 @@ cd ..
 Make a file called `.env` in the root of the project and paste this in:
 
 ```
-PORT=5000
+PORT=5050
 NODE_ENV=development
 DB_HOST=localhost
 DB_USER=root
@@ -84,7 +84,7 @@ You need two terminals running at the same time.
 ```bash
 npm start
 ```
-It should say `Server running on port 5000` if everything is working.
+It should say `Server running on port 5050` if everything is working.
 
 **Terminal 2 — start the frontend** (run this from the client folder):
 ```bash
