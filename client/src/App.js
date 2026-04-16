@@ -111,17 +111,8 @@ function MenuPage() {
   const [menuData,     setMenuData]       = useState({});
   const [loading,      setLoading]        = useState(true);
   const [fetchError,   setFetchError]     = useState(false);
-  const [reviews, setReviews] = useState([]);
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState('');
 
-  useEffect(() => {
-    if (!selectedItem) return;
 
-    fetch(`/api/reviews/${selectedItem.item_id}`)
-      .then(res => res.json())
-      .then(setReviews);
-  }, [selectedItem]);
 
   useEffect(() => {
     setLoading(true);
@@ -158,22 +149,6 @@ function MenuPage() {
     [menu]
   );
 
-  async function submitReview() {
-    await fetch('/api/reviews', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        item_id: selectedItem.item_id,
-        rating,
-        comment
-      })
-    });
-
-    const res = await fetch(`/api/reviews/${selectedItem.item_id}`);
-    setReviews(await res.json());
-
-    setComment('');
-  }
 
   return (
     <div className="page">
@@ -318,34 +293,6 @@ function MenuPage() {
                   <ul>
                     {selectedItem.allergens?.map((a, i) => <li key={i}>{a}</li>)}
                   </ul>
-                </div>
-              </div>
-              <div className="reviews-section">
-                <h4>Reviews</h4>
-
-                {reviews.map(r => (
-                  <div key={r.review_id} className="review">
-                    ⭐ {r.rating}/5
-                    <p>{r.comment}</p>
-                  </div>
-                ))}
-
-                <div className="review-form">
-                  <select value={rating} onChange={e => setRating(e.target.value)}>
-                    {[5,4,3,2,1].map(n => (
-                      <option key={n} value={n}>{n} Stars</option>
-                    ))}
-                  </select>
-
-                  <textarea
-                    value={comment}
-                    onChange={e => setComment(e.target.value)}
-                    placeholder="Write a review..."
-                  />
-
-                  <button onClick={submitReview}>
-                    Submit Review
-                  </button>
                 </div>
               </div>
             </div>

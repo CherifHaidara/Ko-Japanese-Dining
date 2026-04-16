@@ -7,7 +7,17 @@ const menuRoutes = require('./routes/menu');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
-const reservationRoutes = require('./routes/reservations');
+
+
+const mailTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+const reservationRoutes = require('./routes/reservations')(mailTransporter);
 const { buildAdminTokenClaims } = require('./auth/adminSession');
 const userRoutes  = require('./routes/users');
 const reviewRoutes = require('./routes/reviews');
@@ -58,6 +68,7 @@ app.get('/dev/admin-token', (req, res) => {
 });
 
 //Email services
+
 app.post("/api/contact", async (req, res) => {
   const { name, email, phone, subject, message } = req.body;
 
