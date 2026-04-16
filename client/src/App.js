@@ -113,6 +113,11 @@ function MenuPage() {
   const [comment, setComment] = useState('');
 
   useEffect(() => {
+    document.body.style.overflow = selectedItem ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [selectedItem]);
+
+  useEffect(() => {
     if (!selectedItem) return;
 
     fetch(`/api/reviews/${selectedItem.item_id}`)
@@ -174,11 +179,12 @@ function MenuPage() {
 
   return (
     <div className="page">
-      {/* Hero */}
-      <section className="hero">
-        <div className="hero-copy">
+
+      {/* ── Banner ── */}
+      <section className="menu-banner" style={{ backgroundImage: `linear-gradient(135deg, rgba(10,0,0,0.82) 0%, rgba(20,4,4,0.75) 60%, rgba(30,6,6,0.70) 100%), url(${process.env.PUBLIC_URL}/images/menu/sashimi-set-b.png)` }}>
+        <div className="menu-banner-inner">
           <p className="hero-eyebrow">Ko Japanese Dining</p>
-          <h1 className="hero-title">Authentic Japanese cuisine, elevated.</h1>
+          <h1 className="hero-title">Authentic Japanese cuisine,<br />elevated.</h1>
           <p className="hero-subtitle">
             From hand-pressed nigiri to slow-simmered ramen — every dish is crafted with care and served with intention.
           </p>
@@ -186,64 +192,65 @@ function MenuPage() {
             <button className="btn-primary" onClick={() => document.querySelector('.menu-section')?.scrollIntoView({ behavior: 'smooth' })}>
               Browse Menu
             </button>
-            <Link className="btn-outline" to="/reservations">
+            <Link className="btn-outline btn-outline--light" to="/reservations">
               Reserve a Table
             </Link>
-            <button className="btn-outline" onClick={() => setSelectedTab("Sashimi")}>
-              View Sashimi
-            </button>
-          </div>
-        </div>
-
-        <div className="hero-panel">
-          <div className="hero-panel-header">
-            <span className="hero-panel-label">Tonight's Highlights</span>
-            <span className="hero-panel-dot" />
-          </div>
-          <div className="featured-list">
-            {featuredItems.map((item, i) => (
-              <button key={i} className="featured-card" onClick={() => setSelectedItem(item)}>
-                <img src={item.image} alt={item.name} />
-                <div className="featured-card-copy">
-                  <span className="featured-tag">Featured</span>
-                  <h3>{item.name}</h3>
-                  <p>{item.description}</p>
-                </div>
-                <span className="featured-price">${item.price}</span>
-              </button>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* Menu */}
+      {/* ── Tonight's Highlights ── */}
+      {!loading && featuredItems.length > 0 && (
+        <section className="highlights-section">
+          <div className="highlights-header">
+            <p className="section-eyebrow">Chef's Selection</p>
+            <h2 className="highlights-title">Tonight's Highlights</h2>
+          </div>
+          <div className="highlights-grid">
+            {featuredItems.map((item, i) => (
+              <button key={i} className="highlight-card" onClick={() => setSelectedItem(item)}>
+                <div className="highlight-img-wrap">
+                  <img src={item.image} alt={item.name} />
+                </div>
+                <div className="highlight-card-body">
+                  <span className="highlight-badge">Chef's Pick</span>
+                  <div className="highlight-card-top">
+                    <h3>{item.name}</h3>
+                    <span className="highlight-price">${item.price}</span>
+                  </div>
+                  <p className="highlight-desc">{item.description}</p>
+                  <span className="highlight-cta">View &amp; Add to Cart →</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Menu ── */}
       <section className="menu-section">
-        <div className="section-header">
+        <div className="menu-section-header">
           <div>
             <p className="section-eyebrow">Our Menu</p>
             <h2 className="section-title">{selectedTab}</h2>
           </div>
-          <p className="section-subtitle">Tap any dish to view details and add it to your order.</p>
+          <div className="menu-type-tabs" role="tablist" aria-label="Menu type">
+            {MENU_TYPES.map(type => (
+              <button
+                key={type}
+                className={type === menuType ? "menu-type-tab is-active" : "menu-type-tab"}
+                onClick={() => setMenuType(type)}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Menu Type Selector */}
-        <div className="menu-type-tabs" role="tablist" aria-label="Menu type">
-          {MENU_TYPES.map(type => (
-            <button
-              key={type}
-              className={type === menuType ? "menu-type-tab is-active" : "menu-type-tab"}
-              onClick={() => setMenuType(type)}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-
-        {/* Section Tabs + Grid */}
         {loading ? (
           <div className="menu-loading">Loading menu…</div>
         ) : fetchError ? (
-          <div className="menu-loading">Could not load menu. Make sure the backend server is running on the configured API port.</div>
+          <div className="menu-loading">Could not load menu. Please make sure the backend server is running.</div>
         ) : (
           <>
             <div className="tabs" role="tablist">
@@ -261,7 +268,9 @@ function MenuPage() {
             <div className="menu-grid">
               {(menu[selectedTab] || []).map((item, i) => (
                 <button key={i} className="menu-card" onClick={() => setSelectedItem(item)}>
-                  <img src={item.image} alt={item.name} />
+                  <div className="menu-card-img-wrap">
+                    <img src={item.image} alt={item.name} />
+                  </div>
                   <div className="menu-card-body">
                     <div className="menu-card-topline">
                       <h3>{item.name}</h3>
@@ -276,7 +285,7 @@ function MenuPage() {
         )}
       </section>
 
-      {/* Footer */}
+      {/* ── Footer ── */}
       <footer className="footer-strip">
         <div className="footer-brand">
           <img src="/Ko_logo.png" alt="Ko" className="footer-logo" />
@@ -285,7 +294,7 @@ function MenuPage() {
         <span className="footer-copy">© {new Date().getFullYear()} Ko Japanese Dining. All rights reserved.</span>
       </footer>
 
-      {/* Item Modal */}
+      {/* ── Item Modal ── */}
       {selectedItem && (
         <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
@@ -303,44 +312,62 @@ function MenuPage() {
               >
                 Add to Cart — ${selectedItem.price}
               </button>
-              <div className="modal-columns">
-                <div className="detail-panel">
-                  <h4>Modifiers</h4>
-                  <ul>
-                    {selectedItem.modifiers?.map((mod, i) => <li key={i}>{mod}</li>)}
-                  </ul>
+
+              {(selectedItem.modifiers?.length > 0 || selectedItem.allergens?.length > 0) && (
+                <div className="modal-columns">
+                  {selectedItem.modifiers?.length > 0 && (
+                    <div className="detail-panel">
+                      <h4>Modifiers</h4>
+                      <ul>{selectedItem.modifiers.map((mod, i) => <li key={i}>{mod}</li>)}</ul>
+                    </div>
+                  )}
+                  {selectedItem.allergens?.length > 0 && (
+                    <div className="detail-panel">
+                      <h4>Allergens</h4>
+                      <ul>{selectedItem.allergens.map((a, i) => <li key={i}>{a}</li>)}</ul>
+                    </div>
+                  )}
                 </div>
-                <div className="detail-panel">
-                  <h4>Allergens</h4>
-                  <ul>
-                    {selectedItem.allergens?.map((a, i) => <li key={i}>{a}</li>)}
-                  </ul>
-                </div>
-              </div>
+              )}
+
               <div className="reviews-section">
-                <h4>Reviews</h4>
-
-                {reviews.map(r => (
-                  <div key={r.review_id} className="review">
-                    ⭐ {r.rating}/5
-                    <p>{r.comment}</p>
-                  </div>
-                ))}
-
-                <div className="review-form">
-                  <select value={rating} onChange={e => setRating(e.target.value)}>
-                    {[5,4,3,2,1].map(n => (
-                      <option key={n} value={n}>{n} Stars</option>
+                <h4 className="reviews-title">Guest Reviews</h4>
+                {reviews.length === 0 ? (
+                  <p className="reviews-empty">No reviews yet. Be the first!</p>
+                ) : (
+                  <div className="reviews-list">
+                    {reviews.map(r => (
+                      <div key={r.review_id} className="review-item">
+                        <div className="review-stars">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i} className={i < r.rating ? 'star star--filled' : 'star'}>★</span>
+                          ))}
+                        </div>
+                        <p className="review-comment">{r.comment}</p>
+                      </div>
                     ))}
-                  </select>
-
+                  </div>
+                )}
+                <div className="review-form">
+                  <p className="review-form-label">Leave a review</p>
+                  <div className="review-rating-row">
+                    {[1,2,3,4,5].map(n => (
+                      <button
+                        key={n}
+                        type="button"
+                        className={n <= rating ? 'review-star-btn review-star-btn--on' : 'review-star-btn'}
+                        onClick={() => setRating(n)}
+                      >★</button>
+                    ))}
+                  </div>
                   <textarea
+                    className="review-textarea"
                     value={comment}
                     onChange={e => setComment(e.target.value)}
-                    placeholder="Write a review..."
+                    placeholder="Share your experience with this dish…"
+                    rows={3}
                   />
-
-                  <button onClick={submitReview}>
+                  <button className="review-submit-btn" onClick={submitReview}>
                     Submit Review
                   </button>
                 </div>
