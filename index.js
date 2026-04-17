@@ -8,6 +8,16 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
 
+const mysql = require('mysql2/promise');
+
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+});
+
+app.set('db', db);
 
 const mailTransporter = nodemailer.createTransport({
   service: "gmail",

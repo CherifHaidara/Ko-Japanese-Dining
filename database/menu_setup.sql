@@ -98,17 +98,23 @@ CREATE TABLE IF NOT EXISTS item_tags (
     CONSTRAINT fk_itemtag_tag  FOREIGN KEY (tag_id)  REFERENCES tags (tag_id)        ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS item_reviews (
-    review_id     INT AUTO_INCREMENT PRIMARY KEY,
-    item_id       INT NOT NULL,
-    user_id       INT NULL,
-    rating        INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-    comment       TEXT,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS menu_reviews (
+    review_id   INT NOT NULL AUTO_INCREMENT,
+    item_id     INT NOT NULL,
+    user_id     INT NULL,
+    rating      INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment     TEXT,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (review_id),
 
     CONSTRAINT fk_review_item
         FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_review_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE SET NULL
 );
 
 -- ── Clear existing seed data ─────────────────────────────────────────────────

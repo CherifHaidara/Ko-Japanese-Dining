@@ -14,6 +14,7 @@ import Cart from './components/Cart';
 import Contact from './pages/Contact';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound'
+import ReviewSection from './components/ReviewSection';
 
 import { CartProvider, useCart } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -56,7 +57,6 @@ function useTheme() {
 }
 
 function Navbar({ theme, toggleTheme, isReservationPage }) {
-  const [open, setOpen] = useState(false);
 
   const { user } = useAuth();
   return (
@@ -111,6 +111,7 @@ function MenuPage() {
   const [menuData,     setMenuData]       = useState({});
   const [loading,      setLoading]        = useState(true);
   const [fetchError,   setFetchError]     = useState(false);
+  
 
 
 
@@ -269,6 +270,7 @@ function MenuPage() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedItem(null)}>✕</button>
             <img className="modal-image" src={selectedItem.image} alt={selectedItem.name} />
+            f
             <div className="modal-body">
               <div className="modal-topline">
                 <h2>{selectedItem.name}</h2>
@@ -295,6 +297,7 @@ function MenuPage() {
                   </ul>
                 </div>
               </div>
+              <ReviewSection itemId={selectedItem.id} />
             </div>
           </div>
         </div>
