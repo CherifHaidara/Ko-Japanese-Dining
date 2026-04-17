@@ -168,9 +168,9 @@ function MenuPage() {
   useEffect(() => {
     if (!selectedItem) return;
 
-    fetch(`/api/reviews/${selectedItem.item_id}`)
+    fetch(`/api/reviews/${selectedItem.id}`)
       .then(res => res.json())
-      .then(setReviews);
+      .then(data => setReviews(Array.isArray(data) ? data : []));
   }, [selectedItem]);
 
   useEffect(() => {
@@ -209,17 +209,22 @@ function MenuPage() {
   );
 
   async function submitReview() {
-    await fetch('/api/reviews', {
+    const response = await fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        item_id: selectedItem.item_id,
+        item_id: selectedItem.id,
         rating,
         comment
       })
     });
 
-    const res = await fetch(`/api/reviews/${selectedItem.item_id}`);
+    if (!response.ok) {
+      console.error(await response.text());
+      return;
+    }
+
+    const res = await fetch(`/api/reviews/${selectedItem.id}`);
     setReviews(await res.json());
 
     setComment('');
@@ -256,7 +261,7 @@ function MenuPage() {
           </div>
           <div className="highlights-grid">
             {featuredItems.map((item, i) => (
-              <button key={i} className="highlight-card" onClick={() => setSelectedItem(item)}>
+              <button key={i} className="highlight-card" onClick={() => {console.log("clicked item:", item); setSelectedItem(item)}}>
                 <div className="highlight-img-wrap">
                   <img src={item.image} alt={item.name} />
                 </div>
@@ -315,7 +320,7 @@ function MenuPage() {
 
             <div className="menu-grid">
               {(menu[selectedTab] || []).map((item, i) => (
-                <button key={i} className="menu-card" onClick={() => setSelectedItem(item)}>
+                <button key={i} className="menu-card" onClick={() => {console.log("clicked item:", item); setSelectedItem(item)}}>
                   <div className="menu-card-img-wrap">
                     <img src={item.image} alt={item.name} />
                   </div>
