@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS item_tags (
     CONSTRAINT fk_itemtag_tag  FOREIGN KEY (tag_id)  REFERENCES tags (tag_id)        ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS menu_reviews (
+CREATE TABLE IF NOT EXISTS item_reviews (
     review_id   INT NOT NULL AUTO_INCREMENT,
     item_id     INT NOT NULL,
     user_id     INT NULL,
@@ -116,6 +116,11 @@ CREATE TABLE IF NOT EXISTS menu_reviews (
         FOREIGN KEY (user_id) REFERENCES users(user_id)
         ON DELETE SET NULL
 );
+
+INSERT INTO item_reviews (item_id, rating, comment)
+VALUES 
+(1, 5, 'Amazing dish!'),
+(1, 4, 'Really good, would order again');
 
 -- ── Clear existing seed data ─────────────────────────────────────────────────
 SET FOREIGN_KEY_CHECKS = 0;

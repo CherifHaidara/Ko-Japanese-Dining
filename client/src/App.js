@@ -270,7 +270,6 @@ function MenuPage() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedItem(null)}>✕</button>
             <img className="modal-image" src={selectedItem.image} alt={selectedItem.name} />
-            f
             <div className="modal-body">
               <div className="modal-topline">
                 <h2>{selectedItem.name}</h2>

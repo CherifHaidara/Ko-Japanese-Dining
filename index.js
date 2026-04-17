@@ -8,6 +8,8 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const orderRoutes = require('./routes/orders');
 
+
+
 const mysql = require('mysql2/promise');
 
 const db = mysql.createPool({
@@ -17,7 +19,7 @@ const db = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
-app.set('db', db);
+
 
 const mailTransporter = nodemailer.createTransport({
   service: "gmail",
@@ -43,6 +45,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', require('express').static(require('path').join(__dirname, 'uploads')));
 
+app.set('db', db);
 
 // Routes
 app.use('/api/menu', menuRoutes);
@@ -53,6 +56,7 @@ app.use('/api/reservations', reservationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
+
 
 // Test route
 app.get('/', (req, res) => {
