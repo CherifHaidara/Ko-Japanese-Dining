@@ -161,7 +161,7 @@ function Home() {
       {/* ── Final Parallax ── */}
       <div
         className="parallax"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544025162-d76694265947')" }}
+        style={{ backgroundImage: "url('/images/menu/sashimi-tempura-kaiseki.png')" }}
       >
         <div className="overlay"></div>
         <div className="content">
