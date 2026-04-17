@@ -323,6 +323,93 @@ SET @b_dr = (SELECT section_id FROM menu_sections WHERE name = 'Drinks' AND cate
 INSERT INTO menu_items (section_id, name, description, price, is_featured, display_order) VALUES
 (@b_dr, 'Bottomless Mimosas', 'Add Bottomless Mimosas for 90 minutes. Choice of: Yuzu, Grape, Peach, or Classic Orange', 35.00, TRUE, 1);
 
+-- ── Dietary Tags ─────────────────────────────────────────────────────────────
+INSERT IGNORE INTO item_tags (item_id, tag_id)
+SELECT mi.item_id, t.tag_id
+FROM menu_items mi
+JOIN tags t ON t.name = 'Vegetarian'
+WHERE mi.name IN (
+  'Edamame',
+  'Fried Eggplant Cheese',
+  'Fried Cheese',
+  'Fried Tofu (Agedashi)',
+  'Garlic Fries',
+  'Potato Croquettes',
+  'Sliced Tomato w/ Miso Sauce',
+  'Smash Cucumber',
+  'Matcha Affogato',
+  'Mochi Ice Cream',
+  'Basque Burnt Cheesecake',
+  'Matcha Chiffon Cake',
+  'Tamago Sando'
+);
+
+INSERT IGNORE INTO item_tags (item_id, tag_id)
+SELECT mi.item_id, t.tag_id
+FROM menu_items mi
+JOIN tags t ON t.name = 'Vegan'
+WHERE mi.name IN (
+  'Edamame',
+  'Sliced Tomato w/ Miso Sauce',
+  'Smash Cucumber'
+);
+
+INSERT IGNORE INTO item_tags (item_id, tag_id)
+SELECT mi.item_id, t.tag_id
+FROM menu_items mi
+JOIN tags t ON t.name = 'Gluten-Free'
+WHERE mi.name IN (
+  'Sashimi Set A',
+  'Sashimi Set B',
+  'Grilled Fish',
+  'Sabazkake',
+  'Bottomless Mimosas'
+);
+
+INSERT IGNORE INTO item_tags (item_id, tag_id)
+SELECT mi.item_id, t.tag_id
+FROM menu_items mi
+JOIN tags t ON t.name = 'Spicy'
+WHERE mi.name IN (
+  'Spicy Tuna Roll',
+  'Spicy Salmon Roll'
+);
+
+INSERT IGNORE INTO item_tags (item_id, tag_id)
+SELECT mi.item_id, t.tag_id
+FROM menu_items mi
+JOIN tags t ON t.name = 'Raw Fish'
+WHERE mi.name IN (
+  'Sashimi Set A',
+  'Sashimi Set B',
+  'Sushi Set A',
+  'Sushi Set B',
+  'Spicy Tuna Roll',
+  'Spicy Salmon Roll',
+  'Salmon Roll',
+  'Premium Omakase'
+);
+
+INSERT IGNORE INTO item_tags (item_id, tag_id)
+SELECT mi.item_id, t.tag_id
+FROM menu_items mi
+JOIN tags t ON t.name = 'Contains Egg'
+WHERE mi.name IN (
+  'Yakitamago (Rolled Egg)',
+  'Chawanmushi (Steamed Egg)',
+  'Tamago Sando'
+);
+
+INSERT IGNORE INTO item_tags (item_id, tag_id)
+SELECT mi.item_id, t.tag_id
+FROM menu_items mi
+JOIN tags t ON t.name = 'Shellfish'
+WHERE mi.name IN (
+  'Jumbo Fried Shrimp',
+  'Shrimp Tempura Roll',
+  'Tempura Set',
+  'Tendon'
+);
 
 
 -- CURRENTLY FILES DO EXIST BUT MENU DOESN'T DISPLAY THEM IN APP.JS

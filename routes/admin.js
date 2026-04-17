@@ -4,6 +4,15 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const adminGuard = require('../middleware/adminGuard');
 const db = require('../database/db');
+const {
+  ensureSectionExists,
+  getAvailableTags,
+  getMenuItemById,
+  getMenuItems,
+  getMenuSections,
+  syncItemTags,
+  validateMenuItemPayload,
+} = require('../services/menuItems');
 
 const orders = [
   {
@@ -34,6 +43,181 @@ router.patch('/orders/:id/status', auth, adminOnly, (req, res) => {
   order.status = req.body.status;
 
   res.json({ message: 'Updated', order });
+});
+
+router.get('/menu/items', adminGuard, async (req, res) => {
+  try {
+    const [items, sections, tags] = await Promise.all([
+      getMenuItems({ includeUnavailable: true }),
+      getMenuSections(),
+      getAvailableTags(),
+    ]);
+
+    res.json({
+      items,
+      sections,
+      tags,
+    });
+  } catch (err) {
+    console.error('GET /api/admin/menu/items error:', err);
+    res.status(500).json({ message: 'Failed to load admin menu items.' });
+  }
+});
+
+router.post('/menu/items', adminGuard, async (req, res) => {
+  const { errors, data } = validateMenuItemPayload(req.body);
+
+  if (errors.length > 0) {
+    return res.status(400).json({ message: errors[0], errors });
+  }
+
+  if (!(await ensureSectionExists(data.sectionId))) {
+    return res.status(400).json({ message: 'Select a valid menu section.' });
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(
+      `INSERT INTO menu_items (
+        section_id,
+        name,
+        description,
+        price,
+        image_url,
+        is_available,
+        is_featured,
+        calories,
+        display_order
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.sectionId,
+        data.name,
+        data.description,
+        data.price,
+        data.imageUrl || null,
+        data.isAvailable,
+        data.isFeatured,
+        data.calories,
+        data.displayOrder,
+      ]
+    );
+
+    await syncItemTags(result.insertId, data.tags, connection);
+    const item = await getMenuItemById(result.insertId, connection);
+
+    await connection.commit();
+
+    res.status(201).json({
+      message: 'Menu item created.',
+      item,
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error('POST /api/admin/menu/items error:', err);
+    res.status(err.status || 500).json({ message: err.message || 'Failed to create menu item.' });
+  } finally {
+    connection.release();
+  }
+});
+
+router.put('/menu/items/:itemId', adminGuard, async (req, res) => {
+  const itemId = Number(req.params.itemId);
+
+  if (!Number.isInteger(itemId) || itemId <= 0) {
+    return res.status(400).json({ message: 'Select a valid menu item.' });
+  }
+
+  const existingItem = await getMenuItemById(itemId);
+
+  if (!existingItem) {
+    return res.status(404).json({ message: 'Menu item not found.' });
+  }
+
+  const { errors, data } = validateMenuItemPayload(req.body);
+
+  if (errors.length > 0) {
+    return res.status(400).json({ message: errors[0], errors });
+  }
+
+  if (!(await ensureSectionExists(data.sectionId))) {
+    return res.status(400).json({ message: 'Select a valid menu section.' });
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    await connection.query(
+      `UPDATE menu_items
+       SET
+         section_id = ?,
+         name = ?,
+         description = ?,
+         price = ?,
+         image_url = ?,
+         is_available = ?,
+         is_featured = ?,
+         calories = ?,
+         display_order = ?
+       WHERE item_id = ?`,
+      [
+        data.sectionId,
+        data.name,
+        data.description,
+        data.price,
+        data.imageUrl || null,
+        data.isAvailable,
+        data.isFeatured,
+        data.calories,
+        data.displayOrder,
+        itemId,
+      ]
+    );
+
+    await syncItemTags(itemId, data.tags, connection);
+    const item = await getMenuItemById(itemId, connection);
+
+    await connection.commit();
+
+    res.json({
+      message: 'Menu item updated.',
+      item,
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error(`PUT /api/admin/menu/items/${itemId} error:`, err);
+    res.status(err.status || 500).json({ message: err.message || 'Failed to update menu item.' });
+  } finally {
+    connection.release();
+  }
+});
+
+router.delete('/menu/items/:itemId', adminGuard, async (req, res) => {
+  const itemId = Number(req.params.itemId);
+
+  if (!Number.isInteger(itemId) || itemId <= 0) {
+    return res.status(400).json({ message: 'Select a valid menu item.' });
+  }
+
+  try {
+    const [result] = await db.query('DELETE FROM menu_items WHERE item_id = ?', [itemId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Menu item not found.' });
+    }
+
+    res.json({
+      message: 'Menu item deleted.',
+      itemId,
+    });
+  } catch (err) {
+    console.error(`DELETE /api/admin/menu/items/${itemId} error:`, err);
+    res.status(500).json({ message: 'Failed to delete menu item.' });
+  }
 });
 
 // ── GET /api/admin/analytics ──────────────────────────────────────────────────

@@ -1,185 +1,130 @@
-import {useRef} from "react";
-import "./Home.css";
-import "../components/Footer.css";
+import { Link } from 'react-router-dom';
+import './SitePages.css';
+import {
+  HOME_HIGHLIGHTS,
+  MENU_PREVIEW_ITEMS,
+  RESTAURANT_INFO,
+} from '../data/siteContent';
 
-function Home() {
-  const menuRef = useRef(null);
-
-  const previewItems = [
-    { name: "Karaage", image: "/images/menu/karaage.png" },
-    { name: "Tonkatsu", image: "/images/menu/tonkatsu.png" },
-    { name: "Spicy Tuna Roll", image: "/images/menu/spicy-tuna-roll.png" },
-    { name: "Mochi Ice Cream", image: "/images/menu/mochi-ice-cream.png" },
-  ];
-
-  const toggleMenu = (e) => {
-    e.preventDefault();
-    menuRef.current.classList.toggle("show");
-  };
-
+export default function Home() {
   return (
-    <>
-
-      {/* Hero Section */}
-      <div
-        className="parallax"
-        style={{
-          backgroundImage:
-            "url('/images/KoJapaneseParallaxBackground.jpg')",
-        }}
-      >
-        <div className="overlay"></div>
-        <div className="content">
-          <h1>Ko Japanese</h1>
-          <p>Fine Dining Experience Like Never Before</p>
-        </div>
-      </div>
-
-      {/* About */}
-      <div className="section">
-        <h2>About Ko Japanese</h2>
-        <p>
-          Experience the essence of Japan in the heart of DC. At Ko Japanese Dining, 
-          we serve classic Japanese dishes prepared with care and tradition. 
-          From crisp tempura to popular katsu and karaage, every plate is made fresh each day.
-          Our menu brings classic Japanese cooking to life with a delicious range of dishes. 
-          Enjoy fresh sashimi, crisp fried items, and comforting rice and noodle plates. 
-          Many guests love our karaage, tempura, and chicken katsu, each made to order. 
-          Want an elevated experience? 
-        </p>
-        <br />
-        <a href="/japanese-menu" className="button">
-          Explore menu
-        </a>
-        {/* Menu Preview */}
-          <div className="menu-preview-section">
-            <h3>Popular Dishes</h3>
-
-            <div className="menu-preview-grid">
-              {previewItems.map((item, i) => (
-                <div key={i} className="menu-preview-card">
-                  <img src={item.image} alt={item.name} />
-                  <p>{item.name}</p>
-                </div>
-              ))}
-            </div>
-
-            <a href="/japanese-menu" className="button">
-              View Full Menu
-            </a>
-          </div>
-      </div>
-
-      {/* Sabai */}
-      <div
-        className="parallax"
-        style={{
-          backgroundImage:
-            "url('/images/SabaiParallaxBackground.png')",
-        }}
-      >
-        <div className="overlay"></div>
-        <div className="content">
-          <h1>Sabai Thai-Lao</h1>
-          <p>Fine Dining Experience Like Never Before</p>
-        </div>
-      </div>
-
-      <div className="section">
-        <h2>About Sabai Thai-Lao</h2>
-        <p>
-          Located in the heart of Dupont Circle, Sabai Thai–Lao Dining brings the vibrant, authentic flavors of Thailand and Laos to Washington, 
-          D.C. Our family-run restaurant celebrates the dishes we grew up with — from savory larb and papaya salad to rich curries and 
-          grilled skewers — all made with traditional herbs and spices. 
-          We take pride in sharing the warmth of Thai–Lao hospitality while adding our own creative twist to classic recipes. 
-        </p>
-        <br />
-        <a href="https://sabaithai-laodining.com" className="button">
-          Explore menu
-        </a>
-      </div>
-
-      {/* Bar */}
-      <div
-        className="parallax"
-        style={{
-          backgroundImage: "url('/images/StolenBarImage.jpg')",
-        }}
-      >
-        <div className="overlay"></div>
-        <div className="content">
-          <h1>Ko Bar</h1>
-          <p>Fine Dining Experience Like Never Before</p>
-        </div>
-      </div>
-
-      <div className="section">
-        <h2>About Ko Bar</h2>
-        <p>
-          Located in the heart of Dupont Circle, Sabai Thai–Lao Dining brings the vibrant, authentic flavors of Thailand and Laos to Washington, 
-          D.C. Our family-run restaurant celebrates the dishes we grew up with — from savory larb and papaya salad to rich curries and 
-          grilled skewers — all made with traditional herbs and spices. 
-          We take pride in sharing the warmth of Thai–Lao hospitality while adding our own creative twist to classic recipes. 
-        </p>
-        <br />
-        <a href="#Bar" className="button">
-          Explore menu
-        </a>
-      </div>
-
-      {/* Final Parallax */}
-      <div
-        className="parallax"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1544025162-d76694265947')",
-        }}
-      >
-        <div className="overlay"></div>
-        <div className="content">
-          <h1>Fresh Ingredients</h1>
-          <p>Only the best, sourced locally and globally</p>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-container">
-          <div className="footer-col">
-            <h3>Ko Dining</h3>
-            <p>Experience elevated dining in the heart of the city.</p>
-          </div>
-
-          <div className="footer-col">
-            <h4>Location</h4>
+    <div className="site-page">
+      <div className="site-page__shell">
+        <section
+          className="site-hero"
+          style={{ backgroundImage: "url('/images/KoJapaneseParallaxBackground.jpg')" }}
+        >
+          <div className="site-hero__content">
+            <p className="site-eyebrow">Dupont Circle • Traditional Japanese Dining</p>
+            <h1>Japanese tradition, family warmth, and a dinner worth slowing down for.</h1>
             <p>
-              1610 20th St NW, 2nd Floor
-              <br />
-              Washington, DC 20009
+              Ko Japanese Dining brings together chef-led tasting experiences, comforting classics,
+              and an intimate atmosphere designed for everything from a casual lunch to a full
+              celebratory evening.
+            </p>
+            <div className="site-hero__actions">
+              <Link to="/japanese-menu" className="site-hero__primary">
+                Explore the Menu
+              </Link>
+              <Link to="/reservations">Reserve a Table</Link>
+              <Link to="/about">Our Story</Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="site-section">
+          <div className="site-section__header">
+            <div>
+              <p className="site-eyebrow">Why Guests Come Back</p>
+              <h2>Built around hospitality, precision, and pace.</h2>
+            </div>
+            <p>
+              The current Ko experience blends intimate service with classic Japanese dishes,
+              giving the restaurant room to feel both refined and welcoming.
             </p>
           </div>
 
-          <div className="footer-col">
-            <h4>Hours</h4>
-            <p>Mon: Closed<br />Tue - Sun: See website</p>
+          <div className="site-card-grid">
+            {HOME_HIGHLIGHTS.map((highlight) => (
+              <article key={highlight.title} className="site-card">
+                <h3>{highlight.title}</h3>
+                <p>{highlight.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="site-section">
+          <div className="site-section__header">
+            <div>
+              <p className="site-eyebrow">From the Kitchen</p>
+              <h2>Signature dishes that anchor the menu.</h2>
+            </div>
+            <p>
+              Start with the favorites that already define the restaurant, then move into the
+              larger lunch, dinner, and tasting selections.
+            </p>
           </div>
 
-          <div className="footer-col">
-            <h4>Explore</h4>
-            <ul>
-              <li><a href="#">Restaurants</a></li>
-              <li><a href="#">About</a></li>
-              <li><a href="/contact">Contact</a></li>
-            </ul>
+          <div className="site-preview-grid">
+            {MENU_PREVIEW_ITEMS.map((item) => (
+              <article key={item.name} className="site-preview-card">
+                <img src={item.image} alt={item.name} />
+                <div className="site-preview-card__body">
+                  <p>{item.name}</p>
+                </div>
+              </article>
+            ))}
           </div>
-        </div>
+        </section>
 
-        <div className="footer-bottom">
-          <p>© 2026 Ko Dining | Privacy Policy</p>
-        </div>
-      </footer>
-    </>
+        <section className="site-section">
+          <div className="site-split">
+            <article className="site-info-card">
+              <p className="site-eyebrow">Visit Ko</p>
+              <h3>Second-floor dining in the heart of Dupont Circle.</h3>
+              <p>
+                Find us at {RESTAURANT_INFO.addressLine1}, {RESTAURANT_INFO.cityStateZip}. The
+                room is intimate by design, which makes reservations especially helpful during
+                dinner hours and tasting-menu evenings.
+              </p>
+              <div className="site-hero__actions">
+                <Link to="/hours-location" className="site-hero__primary">
+                  Hours & Location
+                </Link>
+                <a href={RESTAURANT_INFO.mapDirectionsUrl} target="_blank" rel="noreferrer">
+                  Get Directions
+                </a>
+              </div>
+            </article>
+
+            <div className="site-photo-card">
+              <img src="/images/StolenBarImage.jpg" alt="Ko Japanese Dining ambience" />
+              <figcaption>
+                A warm, intimate setting that makes a quick dinner feel personal and a special
+                occasion feel memorable.
+              </figcaption>
+            </div>
+          </div>
+        </section>
+
+        <section className="site-cta-band">
+          <p className="site-eyebrow">Plan Your Visit</p>
+          <h3>Come for lunch, stay for dinner, and return for the chef-led experience.</h3>
+          <p>
+            Explore the full menu, book a reservation, or get in touch for group dining and
+            special requests.
+          </p>
+          <div className="site-cta-band__actions">
+            <Link to="/reservations" className="btn-primary">
+              Reserve Now
+            </Link>
+            <Link to="/contact" className="btn-outline">
+              Contact Us
+            </Link>
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }
-
-export default Home;

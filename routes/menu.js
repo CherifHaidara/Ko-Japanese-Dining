@@ -1,58 +1,55 @@
 const express = require('express');
-const router  = express.Router();
-const db      = require('../database/db');
+const router = express.Router();
+const db = require('../database/db');
+const { getAvailableTags, getMenuItems, parseTagList } = require('../services/menuItems');
 
 // GET /api/menu/full?menu=Dinner
 // Returns all sections and items for a given menu category
 router.get('/full', async (req, res) => {
-  const menuName = req.query.menu || 'Dinner';
-
   try {
-    const [categories] = await db.query(
-      'SELECT category_id, name FROM menu_categories WHERE name = ? AND is_active = TRUE',
-      [menuName]
-    );
+    const menuName = req.query.menu || 'Dinner';
+    const items = await getMenuItems({ menu: menuName });
+    const sections = items.reduce((accumulator, item) => {
+      const section = accumulator.find((entry) => entry.section === item.section_name);
 
-    if (categories.length === 0) {
-      return res.status(404).json({ message: `Menu "${menuName}" not found.` });
-    }
+      if (section) {
+        section.items.push(item);
+      } else {
+        accumulator.push({
+          section: item.section_name,
+          items: [item],
+        });
+      }
 
-    const category = categories[0];
+      return accumulator;
+    }, []);
 
-    const [sections] = await db.query(
-      'SELECT section_id, name FROM menu_sections WHERE category_id = ? AND is_active = TRUE ORDER BY display_order',
-      [category.category_id]
-    );
-
-    const result = [];
-
-    for (const section of sections) {
-      const [items] = await db.query(
-        `SELECT item_id, name, description, price, image_url, is_featured, display_order
-         FROM menu_items
-         WHERE section_id = ? AND is_available = TRUE
-         ORDER BY display_order`,
-        [section.section_id]
-      );
-
-      result.push({
-        section: section.name,
-        items: items.map(item => ({
-          id:          item.item_id,
-          name:        item.name,
-          description: item.description,
-          price:       parseFloat(item.price),
-          image_url:   item.image_url,
-          is_featured: item.is_featured === 1
-        }))
-      });
-    }
-
-    res.json({ menu: menuName, sections: result });
-
+    res.json({ menu: menuName, sections });
   } catch (err) {
     console.error('GET /api/menu/full error:', err);
     res.status(500).json({ message: 'Failed to load menu.' });
+  }
+});
+
+// GET /api/menu/items?menu=Dinner&search=roll&tags=Vegetarian&tags=Gluten-Free
+router.get('/items', async (req, res) => {
+  try {
+    const menu = req.query.menu || undefined;
+    const search = req.query.search || req.query.q || '';
+    const tags = parseTagList(req.query.tags);
+    const items = await getMenuItems({ menu, search, tags });
+    const availableTags = await getAvailableTags();
+
+    res.json({
+      menu: menu || null,
+      search: String(search || ''),
+      tags,
+      items,
+      available_tags: availableTags.map((tag) => tag.name),
+    });
+  } catch (err) {
+    console.error('GET /api/menu/items error:', err);
+    res.status(500).json({ message: 'Failed to load menu items.' });
   }
 });
 

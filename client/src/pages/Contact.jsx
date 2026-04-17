@@ -1,22 +1,17 @@
-import React, { useState } from "react";
-
-import "./Contact.css";
-import "../components/Footer.css";
+import React, { useState } from 'react';
+import './SitePages.css';
+import { RESTAURANT_INFO, WEEKLY_HOURS } from '../data/siteContent';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "general",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    subject: 'general',
+    message: '',
   });
-
-
-  
-  const [formMessage, setFormMessage] = useState("");
+  const [formMessage, setFormMessage] = useState('');
   const [isError, setIsError] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -27,22 +22,22 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormMessage("");
-    const { name, email, phone, subject, message } = formData;
+    setFormMessage('');
+    const { name, email, phone, message } = formData;
 
     if (!name || !email || !phone || !message) {
       setIsError(true);
-      setFormMessage("Please fill out all fields.");
+      setFormMessage('Please fill out all fields.');
       return;
     }
 
     setIsError(false);
 
     try {
-      const res = await fetch("http://localhost:5050/api/contact", {
-        method: "POST",
+      const res = await fetch('/api/contact', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
@@ -50,178 +45,165 @@ const Contact = () => {
       const data = await res.json();
 
       if (data.success) {
-        setFormMessage("Thank you! Your message has been sent.");
+        setFormMessage('Thank you! Your message has been sent.');
         setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          subject: "general",
-          message: "",
+          name: '',
+          email: '',
+          phone: '',
+          subject: 'general',
+          message: '',
         });
       } else {
         setIsError(true);
-        setFormMessage(data.error ||"Something went wrong. Try again.");
+        setFormMessage(data.error || 'Something went wrong. Try again.');
       }
     } catch (err) {
       setIsError(true);
-      setFormMessage(err.message || "Server error. Try again later.");
+      setFormMessage(err.message || 'Server error. Try again later.');
     }
   };
 
   return (
-    <>
-      <div className="container">
-        <div className="contact-grid">
-          {/* Contact Info */}
-          <div className="contact-info">
-            <h2>Reach Out to Us—We’re Always Happy to Help</h2>
-
-            <div className="info-item">
-              <strong>📍 Address:</strong><br />
-              1610 20th St NW, 2nd Floor<br />
-              Washington, DC 20009
-            </div>
-
-            <div className="info-item">
-              <strong>📞 Phone:</strong><br />
-              +1 (771)-772-3358
-            </div>
-
-            <div className="info-item">
-              <strong>✉️ Email:</strong><br />
-              ko@kojapanesedining.com
-            </div>
-
-            <div className="info-item">
-              <strong>🕒 Hours:</strong><br />
-              Mon: Closed<br />
-              Tue - Thur: 11:30am - 3pm & 5pm - 9pm<br />
-              Fri: 11:30am - 3pm & 5pm - 10pm<br />
-              Sat: 11:30am - 10pm<br />
-              Sun: 11:30am - 9pm<br />
-            </div>
-          </div>
-
-          {/* Contact Form */}
-          <div className="contact-form">
-            <h2 style={{ textAlign: "center" }}>Contact Us</h2>
-            <p style={{ textAlign: "center" }}>
-              We will get back to you as soon as possible
+    <div className="site-page">
+      <div className="site-page__shell">
+        <section
+          className="site-hero"
+          style={{ backgroundImage: "url('/images/KoJapaneseParallaxBackground.jpg')" }}
+        >
+          <div className="site-hero__content">
+            <p className="site-eyebrow">Contact Us</p>
+            <h1>Reach out for reservations, catering questions, and special dining requests.</h1>
+            <p>
+              We&apos;re happy to help with directions, private dining questions, and planning for
+              larger groups or tasting-menu visits.
             </p>
-
-            <form onSubmit={handleSubmit}>
-              <label className="required-label">Name</label>
-              <input
-                type="text"
-                id="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Your Name"
-              />
-
-              <label className="required-label">Email</label>
-              <input
-                type="email"
-                id="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Your Email"
-              />
-
-              <label className="required-label">Phone #</label>
-              <input
-                type="text"
-                id="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="Your Phone Number"
-              />
-
-              <label className="required-label">Subject</label>
-              <select
-                id="subject"
-                value={formData.subject}
-                onChange={handleChange}
-              >
-                <option value="general">General Inquiry</option>
-                <option value="catering">Catering</option>
-                <option value="comments">Feedback/Comments</option>
-                <option value="other">Other</option>
-              </select>
-
-              <label className="required-label">Message</label>
-              <textarea
-                id="message"
-                rows="5"
-                value={formData.message}
-                onChange={handleChange}
-                placeholder="Your message..."
-              ></textarea>
-
-              <button type="submit" className="send-button">
-                Send Message
-              </button>
-
-              <p style={{ color: isError ? "red" : "limegreen" }}>
-                {formMessage}
-              </p>
-            </form>
           </div>
-        </div>
+        </section>
 
-        {/* Map */}
-        <div className="map-wrapper">
-          <div className="map">
+        <section className="site-section">
+          <div className="site-split">
+            <div className="site-info-stack">
+              <article className="site-info-card">
+                <p className="site-eyebrow">Visit</p>
+                <h3>{RESTAURANT_INFO.addressLine1}</h3>
+                <p>{RESTAURANT_INFO.cityStateZip}</p>
+              </article>
+
+              <article className="site-info-card">
+                <p className="site-eyebrow">Call or Email</p>
+                <p>
+                  <a href={RESTAURANT_INFO.phoneHref}>{RESTAURANT_INFO.phoneDisplay}</a>
+                </p>
+                <p>
+                  <a href={`mailto:${RESTAURANT_INFO.email}`}>{RESTAURANT_INFO.email}</a>
+                </p>
+              </article>
+
+              <article className="site-info-card">
+                <p className="site-eyebrow">Hours</p>
+                <div className="site-hours-grid">
+                  {WEEKLY_HOURS.map((entry) => (
+                    <div key={entry.day} className="site-hours-row">
+                      <strong>{entry.day}</strong>
+                      <span>{entry.hours}</span>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            </div>
+
+            <article className="site-info-card">
+              <p className="site-eyebrow">Send a Message</p>
+              <h3>We&apos;ll get back to you as soon as we can.</h3>
+
+              <form className="site-form" onSubmit={handleSubmit}>
+                <div className="site-form__row">
+                  <label htmlFor="name">
+                    Name
+                    <input
+                      type="text"
+                      id="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Your Name"
+                    />
+                  </label>
+
+                  <label htmlFor="email">
+                    Email
+                    <input
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="you@example.com"
+                    />
+                  </label>
+                </div>
+
+                <div className="site-form__row">
+                  <label htmlFor="phone">
+                    Phone
+                    <input
+                      type="text"
+                      id="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Your Phone Number"
+                    />
+                  </label>
+
+                  <label htmlFor="subject">
+                    Subject
+                    <select
+                      id="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                    >
+                      <option value="general">General Inquiry</option>
+                      <option value="catering">Catering</option>
+                      <option value="comments">Feedback / Comments</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label htmlFor="message">
+                  Message
+                  <textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="How can we help?"
+                  />
+                </label>
+
+                <button type="submit" className="site-form__submit">
+                  Send Message
+                </button>
+
+                {formMessage ? (
+                  <p className={isError ? 'site-form__message is-error' : 'site-form__message is-success'}>
+                    {formMessage}
+                  </p>
+                ) : null}
+              </form>
+            </article>
+          </div>
+        </section>
+
+        <section className="site-section">
+          <div className="site-map">
             <iframe
-              title="map"
-              src="https://maps.google.com/maps?q=38.911635,-77.047625&z=15&output=embed"
-            ></iframe>
+              title="Ko Japanese Dining map"
+              src={RESTAURANT_INFO.mapEmbedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
-        </div>
+        </section>
       </div>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-container">
-          <div className="footer-col">
-            <h3>Ko Dining</h3>
-            <p>Experience elevated dining in the heart of the city.</p>
-          </div>
-
-          <div className="footer-col">
-            <h4>Location</h4>
-            <p>
-              1610 20th St NW, 2nd Floor<br />
-              Washington, DC 20009
-            </p>
-          </div>
-
-          <div className="footer-col">
-            <h4>Hours</h4>
-            <p>
-              Mon: Closed<br />
-              Tue - Thur: 11:30am - 3pm & 5pm - 9pm<br />
-              Fri: 11:30am - 3pm & 5pm - 10pm<br />
-              Sat: 11:30am - 10pm<br />
-              Sun: 11:30am - 9pm
-            </p>
-          </div>
-
-          <div className="footer-col">
-            <h4>Explore</h4>
-            <ul>
-              <li><a href="#">Restaurants</a></li>
-              <li><a href="#">About</a></li>
-              <li><a href="#">Contact</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <p>© 2026 Ko Dining | Privacy Policy</p>
-        </div>
-      </footer>
-    </>
+    </div>
   );
 };
 

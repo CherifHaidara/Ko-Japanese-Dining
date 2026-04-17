@@ -12,6 +12,7 @@ import {
 import './AdminDashboard.css';
 import { clearAdminToken } from '../utils/adminAuth';
 import { normalizeApiError, parseApiResponse } from '../utils/api';
+import AdminMenuManager from '../components/AdminMenuManager';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 const THIRTY_DAYS_AGO = (() => {
@@ -778,12 +779,21 @@ export default function AdminDashboard() {
           >
             Analytics
           </button>
+          <button
+            className={activeView === 'menu' ? 'ad-view-tab is-active' : 'ad-view-tab'}
+            onClick={() => setActiveView('menu')}
+          >
+            Menu
+          </button>
         </div>
       </header>
 
       {activeView === 'orders' && renderOrdersView()}
       {activeView === 'reservations' && renderReservationsView()}
       {activeView === 'analytics' && renderAnalyticsView()}
+      {activeView === 'menu' && (
+        <AdminMenuManager onSessionExpired={redirectToAdminLogin} />
+      )}
 
       {selectedOrder && (
         <div className="ad-overlay" onClick={() => setSelectedOrder(null)}>
