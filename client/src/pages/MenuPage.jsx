@@ -2,6 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { DIETARY_FILTER_TAGS } from '../data/siteContent';
+import ReviewSection from '../components/ReviewSection';
 
 function createDishImage(title, accent) {
   const svg = `
@@ -344,6 +345,7 @@ export default function MenuPage() {
                   </ul>
                 </div>
               </div>
+              <ReviewSection itemId={selectedItem.id} />
             </div>
           </div>
         </div>

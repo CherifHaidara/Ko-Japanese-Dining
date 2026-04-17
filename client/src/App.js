@@ -31,7 +31,7 @@ function useTheme() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggle = () => setTheme(t => t === 'light' ? 'dark' : 'light');
+  const toggle = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
   return { theme, toggle };
 }
 
@@ -63,11 +63,14 @@ function AppShell() {
         <Route path="/login" element={<AuthPage defaultTab="login" />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin" element={
-          <AdminRouteGuard>
-            <AdminDashboard />
-          </AdminRouteGuard>
-        } />
+        <Route
+          path="/admin"
+          element={(
+            <AdminRouteGuard>
+              <AdminDashboard />
+            </AdminRouteGuard>
+          )}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {showSiteFooter ? <Footer /> : null}
