@@ -20,6 +20,16 @@ const ALLOWED_TYPES = new Set([
 ]);
 const ADMIN_STATUSES = new Set(["pending", "confirmed", "cancelled"]);
 
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
 function normalizeDateOnly(value) {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return null;
@@ -393,6 +403,32 @@ router.post("/", async (req, res) => {
         created_at: new Date().toISOString(),
       },
     });
+    try {
+      await transporter.sendMail({
+        from: `"KO Japanese Dining" <${process.env.EMAIL}>`,
+        to: normalizedEmail,
+        subject: `Reservation Confirmed - ${confirmationNumber}`,
+        text: `
+    Hi ${normalizedName},
+
+    Your reservation is confirmed.
+
+    Details:
+    Date: ${normalizedDate}
+    Time: ${normalizedTime.slice(0, 5)}
+    Party Size: ${normalizedPartySize}
+    Dining Option: ${normalizedType}
+
+    Confirmation Number: ${confirmationNumber}
+
+    We look forward to seeing you.
+
+    - KO Japanese Dining
+        `,
+      });
+    } catch (mailErr) {
+      console.error("Reservation email failed:", mailErr);
+    }
   } catch (err) {
     console.error("POST /api/reservations error:", err);
     res.status(500).json({ message: "Failed to create reservation." });
@@ -593,4 +629,10 @@ router.patch("/:id/admin", adminGuard, async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = (transporter) => {
+  router.post("/", async (req, res) => {
+    // use transporter.sendMail(...) here
+  });
+
+  return router;
+};
