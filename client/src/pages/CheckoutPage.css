@@ -178,6 +178,16 @@
   padding: 0 24px;
 }
 
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-shell {
+    width: calc(100% - 32px);
+  }
+}
+
 .form-label {
   font-size: 12px;
   font-weight: 600;

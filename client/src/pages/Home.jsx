@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import './SitePages.css';
 import {
   HOME_HIGHLIGHTS,
@@ -6,7 +8,63 @@ import {
   RESTAURANT_INFO,
 } from '../data/siteContent';
 
+function normalizePreviewItem(item) {
+  return {
+    item_id: item.item_id ?? item.id ?? null,
+    name: item.name,
+    price: item.price ?? null,
+    description: item.description ?? '',
+    image: item.image || item.image_url || '',
+  };
+}
+
 export default function Home() {
+  const { addItem } = useCart();
+  const [previewItems, setPreviewItems] = useState(
+    MENU_PREVIEW_ITEMS.map((item) => normalizePreviewItem(item))
+  );
+
+  useEffect(() => {
+    const featuredNames = ['Karaage', 'Tonkatsu', 'Spicy Tuna Roll', 'Mochi Ice Cream'];
+
+    fetch('/api/menu/full?menu=Dinner')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!data?.sections) {
+          return;
+        }
+
+        const allItems = data.sections.flatMap((section) => section.items || []);
+        const featured = featuredNames
+          .map((name) => allItems.find((item) => item.name === name))
+          .filter(Boolean)
+          .map((item) => normalizePreviewItem({
+            ...item,
+            image: item.image_url || `/images/menu/${item.name.toLowerCase().replace(/\s+/g, '-')}.png`,
+          }));
+
+        if (featured.length > 0) {
+          setPreviewItems(featured);
+        }
+      })
+      .catch(() => {
+        // Keep the static preview cards if the API is unavailable.
+      });
+  }, []);
+
+  const handlePreviewAdd = (item) => {
+    if (!item.price) {
+      return;
+    }
+
+    addItem({
+      item_id: item.item_id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+    });
+  };
+
   return (
     <div className="site-page">
       <div className="site-page__shell">
@@ -39,8 +97,8 @@ export default function Home() {
               <h2>Built around hospitality, precision, and pace.</h2>
             </div>
             <p>
-              The current Ko experience blends intimate service with classic Japanese dishes,
-              giving the restaurant room to feel both refined and welcoming.
+              The current Ko experience blends classic Japanese dishes, chef-led courses, and a
+              calm service rhythm that feels polished without becoming distant.
             </p>
           </div>
 
@@ -61,17 +119,30 @@ export default function Home() {
               <h2>Signature dishes that anchor the menu.</h2>
             </div>
             <p>
-              Start with the favorites that already define the restaurant, then move into the
-              larger lunch, dinner, and tasting selections.
+              These preview dishes pull from the live dinner menu when the API is available, so
+              the home page stays aligned with the current menu experience.
             </p>
           </div>
 
           <div className="site-preview-grid">
-            {MENU_PREVIEW_ITEMS.map((item) => (
-              <article key={item.name} className="site-preview-card">
+            {previewItems.map((item) => (
+              <article
+                key={item.name}
+                className="site-preview-card"
+                role={item.price ? 'button' : undefined}
+                tabIndex={item.price ? 0 : undefined}
+                onClick={() => handlePreviewAdd(item)}
+                onKeyDown={(event) => {
+                  if (item.price && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault();
+                    handlePreviewAdd(item);
+                  }
+                }}
+              >
                 <img src={item.image} alt={item.name} />
                 <div className="site-preview-card__body">
                   <p>{item.name}</p>
+                  {item.price ? <span>${Number(item.price).toFixed(2)}</span> : null}
                 </div>
               </article>
             ))}

@@ -36,6 +36,13 @@
   justify-content: center;
 }
 
+@media (max-width: 768px) {
+  .cart-btn {
+    /* hide the floating cart button — cart icon moves into the navbar */
+    display: none;
+  }
+}
+
 /* ── Overlay & Panel ───────────────────────────────────────────────────── */
 .cart-overlay {
   position: fixed;

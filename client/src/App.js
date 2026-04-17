@@ -5,11 +5,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminRouteGuard from './components/AdminRouteGuard';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CheckoutPage from './pages/CheckoutPage';
+import AccountReservationsPage from './pages/AccountReservationsPage';
+import ReservationPage from './pages/ReservationPage';
 import OrderStatusPage from './pages/OrderStatusPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
-import AccountReservationsPage from './pages/AccountReservationsPage';
-import ReservationPage from './pages/ReservationPage';
 import Cart from './components/Cart';
 import Contact from './pages/Contact';
 import Home from './pages/Home';
@@ -31,7 +31,7 @@ function useTheme() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggle = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+  const toggle = () => setTheme((current) => (current === 'light' ? 'dark' : 'light'));
   return { theme, toggle };
 }
 

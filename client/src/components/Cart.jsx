@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Cart.css';
@@ -6,8 +6,7 @@ import './Cart.css';
 const TAX_RATE = 0.0875;
 
 export default function Cart() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice, isCartOpen: isOpen, setIsCartOpen: setIsOpen } = useCart();
   const navigate = useNavigate();
 
   const tax = totalPrice * TAX_RATE;
