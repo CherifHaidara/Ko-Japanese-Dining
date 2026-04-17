@@ -37,13 +37,13 @@ html {
 }
 
 .content h1 {
-    font-size: 60px;
+    font-size: clamp(32px, 8vw, 60px);
     margin-bottom: 10px;
     color: white;
 }
 
 .content p {
-    font-size: 20px;
+    font-size: clamp(15px, 2.5vw, 20px);
     max-width: 600px;
     margin: auto;
     color: white;
@@ -59,7 +59,7 @@ html {
 }
 
 .section h2 {
-    font-size: 36px;
+    font-size: clamp(22px, 5vw, 36px);
     margin-bottom: 20px;
     color: var(--text);
 }
@@ -210,6 +210,29 @@ a {
 @keyframes toast-in {
     from { opacity: 0; transform: translateX(-50%) translateY(10px); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Mobile tweaks ──────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .parallax--hero {
+    background-attachment: scroll; /* fixed attachment breaks on iOS */
+  }
+
+  .parallax {
+    background-attachment: scroll;
+  }
+
+  .section {
+    padding: 36px 16px;
+  }
+
+  .menu-preview-card {
+    width: 140px;
+  }
+
+  .menu-preview-img-wrap img {
+    height: 120px;
+  }
 }
 
 /* ── Back to Top ────────────────────────────────────────────────────────── */

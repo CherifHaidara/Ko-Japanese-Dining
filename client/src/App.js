@@ -57,11 +57,13 @@ function useTheme() {
 
 function Navbar({ theme, toggleTheme, isReservationPage }) {
   const { user } = useAuth();
+  const { totalItems, setIsCartOpen } = useCart();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <nav className={isReservationPage ? 'navbar navbar--reservation' : 'navbar'}>
       <div className="navbar-inner">
-        <Link to="/" className="navbar-brand">
+        <Link to="/" className="navbar-brand" onClick={() => setMobileOpen(false)}>
           <img
             src="/Ko_logo.png"
             alt="Ko Japanese Dining"
@@ -92,7 +94,53 @@ function Navbar({ theme, toggleTheme, isReservationPage }) {
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
+
+        <button className="navbar-mobile-cart" onClick={() => setIsCartOpen(true)} aria-label="Open cart">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          {totalItems > 0 && <span className="navbar-mobile-cart-count">{totalItems}</span>}
+        </button>
+
+        <button
+          className="navbar-hamburger"
+          onClick={() => setMobileOpen(o => !o)}
+          aria-label="Toggle navigation"
+          aria-expanded={mobileOpen}
+        >
+          <span className={mobileOpen ? 'hamburger-bar hamburger-bar--top-open' : 'hamburger-bar'} />
+          <span className={mobileOpen ? 'hamburger-bar hamburger-bar--mid-open' : 'hamburger-bar'} />
+          <span className={mobileOpen ? 'hamburger-bar hamburger-bar--bot-open' : 'hamburger-bar'} />
+        </button>
       </div>
+
+      {mobileOpen && (
+        <div className="navbar-mobile-nav">
+          <Link to="/japanese-menu" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Menu</Link>
+          <Link to="/reservations" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Reserve</Link>
+          <Link to="/account" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>My Reservations</Link>
+          <Link to="/admin/login" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Admin</Link>
+          <Link to="/contact" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Contact</Link>
+          <div className="mobile-nav-bottom">
+            {user ? (
+              <Link to="/profile" className="mobile-nav-profile" onClick={() => setMobileOpen(false)}>
+                {user.profile_picture ? (
+                  <img src={`/uploads/${user.profile_picture}`} alt="" className="nav-profile-avatar nav-profile-avatar--img" />
+                ) : (
+                  <span className="nav-profile-avatar">{user.first_name?.[0]?.toUpperCase() || '?'}</span>
+                )}
+                <span>{user.first_name}</span>
+              </Link>
+            ) : (
+              <Link to="/login" className="mobile-nav-link" style={{ borderBottom: 'none', padding: '0' }} onClick={() => setMobileOpen(false)}>Sign In</Link>
+            )}
+            <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
@@ -386,11 +434,12 @@ function AppShell() {
   const isReservationPage =
     location.pathname.startsWith('/reservations') ||
     location.pathname.startsWith('/account');
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   return (
     <>
-      <Navbar theme={theme} toggleTheme={toggle} isReservationPage={isReservationPage} />
-      <Cart />
+      {!isAdminPage && <Navbar theme={theme} toggleTheme={toggle} isReservationPage={isReservationPage} />}
+      {!isAdminPage && <Cart />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />

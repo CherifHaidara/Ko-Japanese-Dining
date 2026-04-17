@@ -63,60 +63,41 @@ export default function AdminLoginPage() {
 
   return (
     <div className="admin-login-shell">
-      <div className="admin-login-glow admin-login-glow-left" />
-      <div className="admin-login-glow admin-login-glow-right" />
-
-      <main className="admin-login-layout">
-        <section className="admin-login-intro">
-          <p className="admin-login-eyebrow">Ko Japanese Dining</p>
-          <h1>Admin access is protected behind a separate check.</h1>
-          <p className="admin-login-copy">
-            Use the temporary admin password to enter the operations dashboard and manage live order status updates.
-          </p>
-          <div className="admin-login-notes">
-            <div className="admin-login-note">
-              <span>Access flow</span>
-              <strong>Menu page to admin sign-in to dashboard</strong>
-            </div>
-            <div className="admin-login-note">
-              <span>Temporary password</span>
-              <strong>Set to Admin1234 on the server for now</strong>
-            </div>
+      <div className="admin-login-card">
+        <div className="admin-login-logo">
+          <div className="admin-login-logo-mark">KO</div>
+          <div>
+            <div className="admin-login-logo-text">Ko Japanese Dining</div>
+            <div className="admin-login-logo-sub">Admin Portal</div>
           </div>
-        </section>
+        </div>
 
-        <section className="admin-login-card">
-          <div className="admin-login-card-inner">
-            <p className="admin-login-label">Admin Verification</p>
-            <h2>Enter admin password</h2>
-            <p className="admin-login-helper">
-              This verifies admin access and routes you directly into the dashboard.
-            </p>
+        <h1 className="admin-login-heading">Sign in</h1>
+        <p className="admin-login-subheading">Enter the admin password to access the dashboard.</p>
 
-            <form className="admin-login-form" onSubmit={handleSubmit}>
-              <label htmlFor="admin-password">Password</label>
-              <input
-                id="admin-password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter admin password"
-                autoComplete="current-password"
-              />
-
-              {error ? <p className="admin-login-error">{error}</p> : null}
-
-              <button type="submit" className="admin-login-submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Checking access...' : 'Enter Dashboard'}
-              </button>
-            </form>
-
-            <Link className="admin-login-back" to="/">
-              Return to menu
-            </Link>
+        <form className="admin-login-form" onSubmit={handleSubmit}>
+          <div className="admin-login-field">
+            <label htmlFor="admin-password">Password</label>
+            <input
+              id="admin-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Enter admin password"
+              autoComplete="current-password"
+              autoFocus
+            />
           </div>
-        </section>
-      </main>
+
+          {error ? <p className="admin-login-error">{error}</p> : null}
+
+          <button type="submit" className="admin-login-submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Verifying...' : 'Enter Dashboard'}
+          </button>
+        </form>
+
+        <Link className="admin-login-back" to="/">← Back to site</Link>
+      </div>
     </div>
   );
 }

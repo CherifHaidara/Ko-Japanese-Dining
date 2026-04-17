@@ -179,59 +179,132 @@ button { font: inherit; cursor: pointer; }
   background: none;
 }
 
-.navbar--reservation {
-  background: #ffffff;
-  border-bottom-color: #bb2233;
+/* ── Mobile cart button (shown only in navbar on mobile) ────────────────── */
+.navbar-mobile-cart {
+  display: none;
+  position: relative;
+  background: var(--red);
+  border: none;
+  border-radius: 50px;
+  color: #fff;
+  padding: 8px 14px;
+  cursor: pointer;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  transition: background 0.2s;
 }
 
-.navbar--reservation .navbar-name {
-  color: #000000;
+.navbar-mobile-cart:hover { background: var(--red-hover); }
+
+.navbar-mobile-cart-count {
+  background: #fff;
+  color: var(--red);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
 }
 
-.navbar--reservation .nav-admin-link {
-  color: #000000;
-  border-color: #bb2233;
-  background: #ffffff;
+@media (max-width: 768px) {
+  .navbar-mobile-cart {
+    display: flex;
+  }
 }
 
-.navbar--reservation .nav-admin-link:hover {
-  color: #ffffff;
-  background: #bb2233;
-  border-color: #bb2233;
+/* ── Hamburger button (hidden on desktop) ───────────────────────────────── */
+.navbar-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
 
-.navbar--reservation .theme-toggle {
-  color: #000000;
-  border-color: #bb2233;
-  background: #ffffff;
+.hamburger-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  transform-origin: center;
 }
 
-.navbar--reservation .theme-toggle:hover {
-  color: #ffffff;
-  background: #bb2233;
-  border-color: #bb2233;
+.hamburger-bar--top-open  { transform: translateY(7px) rotate(45deg); }
+.hamburger-bar--mid-open  { opacity: 0; transform: scaleX(0); }
+.hamburger-bar--bot-open  { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Mobile nav drawer ──────────────────────────────────────────────────── */
+.navbar-mobile-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  gap: 0;
 }
 
-[data-theme="dark"] .navbar--reservation {
-  background: #000000;
-  border-bottom-color: #bb2233;
+.mobile-nav-link {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-decoration: none;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s;
+  display: block;
 }
 
-[data-theme="dark"] .navbar--reservation .navbar-name,
-[data-theme="dark"] .navbar--reservation .nav-admin-link,
-[data-theme="dark"] .navbar--reservation .theme-toggle {
-  color: #ffffff;
-  background: #000000;
+.mobile-nav-link:last-of-type { border-bottom: none; }
+.mobile-nav-link:hover { color: var(--text); }
+
+.mobile-nav-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
 }
 
-[data-theme="dark"] .navbar--reservation .nav-admin-link {
-  border-color: #bb2233;
+.mobile-nav-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
-[data-theme="dark"] .navbar--reservation .nav-admin-link:hover,
-[data-theme="dark"] .navbar--reservation .theme-toggle:hover {
-  background: #bb2233;
-  border-color: #bb2233;
+.mobile-nav-profile:hover { color: var(--text); }
+
+/* ── Mobile breakpoint ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar-inner {
+    width: calc(100% - 32px);
+  }
+
+  .navbar-actions {
+    display: none;
+  }
+
+  .navbar-hamburger {
+    display: flex;
+  }
 }
 
 /* ── Page Shell ─────────────────────────────────────────────────────────── */
@@ -239,6 +312,13 @@ button { font: inherit; cursor: pointer; }
   width: min(1200px, calc(100% - 48px));
   margin: 0 auto;
   padding: 64px 0 96px;
+}
+
+@media (max-width: 768px) {
+  .page {
+    width: calc(100% - 32px);
+    padding: 40px 0 72px;
+  }
 }
 
 /* ── Menu Banner ────────────────────────────────────────────────────────── */
@@ -934,6 +1014,40 @@ button { font: inherit; cursor: pointer; }
 }
 
 .review-submit-btn:hover { background: var(--red-hover); }
+
+/* ── Menu page mobile tweaks ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .menu-banner {
+    padding: 64px 20px 56px;
+  }
+
+  .menu-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-height: 92vh;
+    border-radius: 18px 18px 12px 12px;
+  }
+
+  .modal-image {
+    height: 200px;
+  }
+
+  .modal-body {
+    padding: 20px 20px 28px;
+  }
+
+  .modal-columns {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ── Footer Strip ───────────────────────────────────────────────────────── */
 .footer-strip {
