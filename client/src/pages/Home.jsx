@@ -1,201 +1,213 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import './SitePages.css';
-import {
-  HOME_HIGHLIGHTS,
-  MENU_PREVIEW_ITEMS,
-  RESTAURANT_INFO,
-} from '../data/siteContent';
+import { useState, useEffect } from "react";
+import { useCart } from "../context/CartContext";
+import "./Home.css";
+import "../components/Footer.css";
 
-function normalizePreviewItem(item) {
-  return {
-    item_id: item.item_id ?? item.id ?? null,
-    name: item.name,
-    price: item.price ?? null,
-    description: item.description ?? '',
-    image: item.image || item.image_url || '',
-  };
-}
+function Home() {
+  const { addItem, isCartOpen } = useCart();
 
-export default function Home() {
-  const { addItem } = useCart();
-  const [previewItems, setPreviewItems] = useState(
-    MENU_PREVIEW_ITEMS.map((item) => normalizePreviewItem(item))
-  );
+  const [showTop,      setShowTop]      = useState(false);
+  const [previewItems, setPreviewItems] = useState([]);
+  const [toast,        setToast]        = useState('');
+
+  const FEATURED_NAMES = ["Karaage", "Tonkatsu", "Spicy Tuna Roll", "Mochi Ice Cream"];
+
 
   useEffect(() => {
-    const featuredNames = ['Karaage', 'Tonkatsu', 'Spicy Tuna Roll', 'Mochi Ice Cream'];
-
     fetch('/api/menu/full?menu=Dinner')
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (!data?.sections) {
-          return;
-        }
-
-        const allItems = data.sections.flatMap((section) => section.items || []);
-        const featured = featuredNames
-          .map((name) => allItems.find((item) => item.name === name))
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        const allItems = data.sections.flatMap(s => s.items);
+        const featured = FEATURED_NAMES
+          .map(name => allItems.find(i => i.name === name))
           .filter(Boolean)
-          .map((item) => normalizePreviewItem({
-            ...item,
-            image: item.image_url || `/images/menu/${item.name.toLowerCase().replace(/\s+/g, '-')}.png`,
+          .map(item => ({
+            item_id:     item.item_id,
+            name:        item.name,
+            price:       item.price,
+            description: item.description,
+            image:       item.image_url || `/images/menu/${item.name.toLowerCase().replace(/\s+/g, '-')}.png`,
           }));
-
-        if (featured.length > 0) {
-          setPreviewItems(featured);
-        }
+        setPreviewItems(featured);
       })
       .catch(() => {
-        // Keep the static preview cards if the API is unavailable.
+        setPreviewItems(FEATURED_NAMES.map(name => ({
+          name,
+          image: `/images/menu/${name.toLowerCase().replace(/\s+/g, '-')}.png`,
+          price: null,
+        })));
       });
   }, []);
 
-  const handlePreviewAdd = (item) => {
-    if (!item.price) {
-      return;
-    }
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    addItem({
-      item_id: item.item_id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-    });
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const handleAddToCart = (item) => {
+    if (!item.price) return;
+    addItem({ item_id: item.item_id, name: item.name, price: item.price });
+    setToast(item.name);
+    setTimeout(() => setToast(''), 2000);
   };
 
   return (
-    <div className="site-page">
-      <div className="site-page__shell">
-        <section
-          className="site-hero"
-          style={{ backgroundImage: "url('/images/KoJapaneseParallaxBackground.jpg')" }}
-        >
-          <div className="site-hero__content">
-            <p className="site-eyebrow">Dupont Circle • Traditional Japanese Dining</p>
-            <h1>Japanese tradition, family warmth, and a dinner worth slowing down for.</h1>
-            <p>
-              Ko Japanese Dining brings together chef-led tasting experiences, comforting classics,
-              and an intimate atmosphere designed for everything from a casual lunch to a full
-              celebratory evening.
-            </p>
-            <div className="site-hero__actions">
-              <Link to="/japanese-menu" className="site-hero__primary">
-                Explore the Menu
-              </Link>
-              <Link to="/reservations">Reserve a Table</Link>
-              <Link to="/about">Our Story</Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="site-section">
-          <div className="site-section__header">
-            <div>
-              <p className="site-eyebrow">Why Guests Come Back</p>
-              <h2>Built around hospitality, precision, and pace.</h2>
-            </div>
-            <p>
-              The current Ko experience blends classic Japanese dishes, chef-led courses, and a
-              calm service rhythm that feels polished without becoming distant.
-            </p>
-          </div>
-
-          <div className="site-card-grid">
-            {HOME_HIGHLIGHTS.map((highlight) => (
-              <article key={highlight.title} className="site-card">
-                <h3>{highlight.title}</h3>
-                <p>{highlight.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="site-section">
-          <div className="site-section__header">
-            <div>
-              <p className="site-eyebrow">From the Kitchen</p>
-              <h2>Signature dishes that anchor the menu.</h2>
-            </div>
-            <p>
-              These preview dishes pull from the live dinner menu when the API is available, so
-              the home page stays aligned with the current menu experience.
-            </p>
-          </div>
-
-          <div className="site-preview-grid">
-            {previewItems.map((item) => (
-              <article
-                key={item.name}
-                className="site-preview-card"
-                role={item.price ? 'button' : undefined}
-                tabIndex={item.price ? 0 : undefined}
-                onClick={() => handlePreviewAdd(item)}
-                onKeyDown={(event) => {
-                  if (item.price && (event.key === 'Enter' || event.key === ' ')) {
-                    event.preventDefault();
-                    handlePreviewAdd(item);
-                  }
-                }}
-              >
-                <img src={item.image} alt={item.name} />
-                <div className="site-preview-card__body">
-                  <p>{item.name}</p>
-                  {item.price ? <span>${Number(item.price).toFixed(2)}</span> : null}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="site-section">
-          <div className="site-split">
-            <article className="site-info-card">
-              <p className="site-eyebrow">Visit Ko</p>
-              <h3>Second-floor dining in the heart of Dupont Circle.</h3>
-              <p>
-                Find us at {RESTAURANT_INFO.addressLine1}, {RESTAURANT_INFO.cityStateZip}. The
-                room is intimate by design, which makes reservations especially helpful during
-                dinner hours and tasting-menu evenings.
-              </p>
-              <div className="site-hero__actions">
-                <Link to="/hours-location" className="site-hero__primary">
-                  Hours & Location
-                </Link>
-                <a href={RESTAURANT_INFO.mapDirectionsUrl} target="_blank" rel="noreferrer">
-                  Get Directions
-                </a>
-              </div>
-            </article>
-
-            <div className="site-photo-card">
-              <img src="/images/StolenBarImage.jpg" alt="Ko Japanese Dining ambience" />
-              <figcaption>
-                A warm, intimate setting that makes a quick dinner feel personal and a special
-                occasion feel memorable.
-              </figcaption>
-            </div>
-          </div>
-        </section>
-
-        <section className="site-cta-band">
-          <p className="site-eyebrow">Plan Your Visit</p>
-          <h3>Come for lunch, stay for dinner, and return for the chef-led experience.</h3>
-          <p>
-            Explore the full menu, book a reservation, or get in touch for group dining and
-            special requests.
-          </p>
-          <div className="site-cta-band__actions">
-            <Link to="/reservations" className="btn-primary">
-              Reserve Now
-            </Link>
-            <Link to="/contact" className="btn-outline">
-              Contact Us
-            </Link>
-          </div>
-        </section>
+    <>
+      {/* ── Hero ── */}
+      <div
+        className="parallax parallax--hero"
+        style={{ backgroundImage: "url('/images/KoJapaneseParallaxBackground.jpg')" }}
+      >
+        <div className="overlay"></div>
+        <div className="content">
+          <h1>Ko Japanese</h1>
+          <p>Fine Dining Experience Like Never Before</p>
+        </div>
       </div>
-    </div>
+
+      {/* ── Ko Japanese ── */}
+      <div id="ko-japanese" className="section">
+        <h2>About Ko Japanese</h2>
+        <p>
+          Experience the essence of Japan in the heart of DC. At Ko Japanese Dining,
+          we serve classic Japanese dishes prepared with care and tradition.
+          From crisp tempura to popular katsu and karaage, every plate is made fresh each day.
+          Enjoy fresh sashimi, crisp fried items, and comforting rice and noodle plates —
+          each made to order.
+        </p>
+
+        <div className="menu-preview-section">
+          <h3>Popular Dishes</h3>
+          <div className="menu-preview-grid">
+            {previewItems.map((item, i) => (
+              <div
+                key={i}
+                className="menu-preview-card"
+                onClick={() => handleAddToCart(item)}
+                title={item.price ? `Add ${item.name} to cart` : ''}
+              >
+                <div className="menu-preview-img-wrap">
+                  <img src={item.image} alt={item.name} />
+                  {item.price && (
+                    <div className="menu-preview-hover-overlay">
+                      <span>+ Add to Cart</span>
+                    </div>
+                  )}
+                </div>
+                <div className="menu-preview-card-footer">
+                  <p className="menu-preview-name">{item.name}</p>
+                  {item.price && (
+                    <p className="menu-preview-price">${parseFloat(item.price).toFixed(2)}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <a href="/japanese-menu" className="button">View Full Menu</a>
+        </div>
+      </div>
+
+      {/* ── Sabai ── */}
+      <div
+        className="parallax"
+        style={{ backgroundImage: "url('/images/SabaiParallaxBackground.png')" }}
+      >
+        <div className="overlay"></div>
+        <div className="content">
+          <h1>Sabai Thai-Lao</h1>
+          <p>Fine Dining Experience Like Never Before</p>
+        </div>
+      </div>
+
+      <div id="sabai" className="section">
+        <h2>About Sabai Thai-Lao</h2>
+        <p>
+          Located in the heart of Dupont Circle, Sabai Thai–Lao Dining brings the vibrant,
+          authentic flavors of Thailand and Laos to Washington, D.C. Our family-run restaurant
+          celebrates the dishes we grew up with — from savory larb and papaya salad to rich
+          curries and grilled skewers — all made with traditional herbs and spices.
+        </p>
+        <br />
+        <a href="https://sabaithai-laodining.com" className="button">Explore menu</a>
+      </div>
+
+      {/* ── Ko Bar ── */}
+      <div
+        className="parallax"
+        style={{ backgroundImage: "url('/images/StolenBarImage.jpg')" }}
+      >
+        <div className="overlay"></div>
+        <div className="content">
+          <h1>Ko Bar</h1>
+          <p>Fine Dining Experience Like Never Before</p>
+        </div>
+      </div>
+
+      <div id="ko-bar" className="section">
+        <h2>About Ko Bar</h2>
+        <p>
+          Located in the heart of Dupont Circle, Ko Bar offers an elevated lounge experience
+          with craft cocktails and a refined atmosphere. The perfect complement to a night of
+          exceptional dining — whether you're starting the evening or ending it in style.
+        </p>
+        <br />
+        <a href="#ko-bar" className="button">Explore menu</a>
+      </div>
+
+      {/* ── Final Parallax ── */}
+      <div
+        className="parallax"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544025162-d76694265947')" }}
+      >
+        <div className="overlay"></div>
+        <div className="content">
+          <h1>Fresh Ingredients</h1>
+          <p>Only the best, sourced locally and globally</p>
+        </div>
+      </div>
+
+      {/* ── Footer ── */}
+      <footer className="footer">
+        <div className="footer-container">
+          <div className="footer-col">
+            <h3>Ko Dining</h3>
+            <p>Experience elevated dining in the heart of the city.</p>
+          </div>
+          <div className="footer-col">
+            <h4>Location</h4>
+            <p>1610 20th St NW, 2nd Floor<br />Washington, DC 20009</p>
+          </div>
+          <div className="footer-col">
+            <h4>Hours</h4>
+            <p>Mon: Closed<br />Tue - Sun: See website</p>
+          </div>
+          <div className="footer-col">
+            <h4>Explore</h4>
+            <ul>
+              <li><a href="#">Restaurants</a></li>
+              <li><a href="#">About</a></li>
+              <li><a href="/contact">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>© 2026 Ko Dining | Privacy Policy</p>
+        </div>
+      </footer>
+
+      {showTop && !isCartOpen && (
+        <button className="back-to-top" onClick={scrollToTop} aria-label="Back to top">↑</button>
+      )}
+
+      {toast && (
+        <div className="cart-toast">{toast} added to cart!</div>
+      )}
+    </>
   );
 }
+
+export default Home;
