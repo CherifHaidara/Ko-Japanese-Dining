@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS orders (
     created_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
                                   ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (order_id),
+    PRIMARY KEY (order_id)
     -- CONSTRAINT fk_order_customer
     --     FOREIGN KEY (customer_id) REFERENCES users (user_id)
     --     ON DELETE SET NULL

@@ -275,8 +275,8 @@ export default function ReservationPage() {
             >
               Edit Reservation
             </button>
-            <Link to="/" className="btn-outline reservation-link-btn">
-              Back to Menu
+            <Link to="/japanese-menu" className="btn-outline reservation-link-btn">
+              Go to Menu
             </Link>
           </div>
         </section>
