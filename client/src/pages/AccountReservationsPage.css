@@ -321,6 +321,7 @@
 .account-modal-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 @media (max-width: 860px) {

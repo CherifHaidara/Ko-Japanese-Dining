@@ -81,29 +81,39 @@ function formatDisplayTime(timeString) {
   });
 }
 
-function buildTimeSlots(dateString) {
+const DEFAULT_SETTINGS = {
+  opening_hour: 17,
+  closing_hour: 21,
+  slot_interval_minutes: 30,
+  large_party_min: 8,
+  modification_cutoff_hours: 2,
+};
+
+function formatHour(hour) {
+  const d = new Date();
+  d.setHours(hour, 0, 0, 0);
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function buildTimeSlots(dateString, settings = DEFAULT_SETTINGS) {
+  const { opening_hour, closing_hour, slot_interval_minutes } = settings;
   const slots = [];
   const selectedDate = dateString ? new Date(`${dateString}T00:00:00`) : new Date();
   const today = new Date();
   const isToday = selectedDate.toDateString() === today.toDateString();
 
-  for (let hour = 17; hour <= 21; hour += 1) {
-    for (const minute of [0, 30]) {
-      if (hour === 21 && minute > 0) continue;
+  for (let hour = opening_hour; hour <= closing_hour; hour++) {
+    for (let minute = 0; minute < 60; minute += slot_interval_minutes) {
+      if (hour === closing_hour && minute > 0) continue;
 
       const slotDate = new Date(selectedDate);
       slotDate.setHours(hour, minute, 0, 0);
 
-      if (isToday && slotDate.getTime() < today.getTime() + 60 * 60 * 1000) {
-        continue;
-      }
+      if (isToday && slotDate.getTime() < today.getTime() + 60 * 60 * 1000) continue;
 
       slots.push({
         value: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`,
-        label: slotDate.toLocaleTimeString([], {
-          hour: 'numeric',
-          minute: '2-digit',
-        }),
+        label: slotDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
       });
     }
   }
@@ -113,6 +123,14 @@ function buildTimeSlots(dateString) {
 
 export default function ReservationPage() {
   const minDate = useMemo(() => getMinReservationDate(), []);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(() => {});
+  }, []);
   const [form, setForm] = useState({
     date: minDate,
     time: '',
@@ -130,7 +148,7 @@ export default function ReservationPage() {
   const [confirmationNumber, setConfirmationNumber] = useState('');
   const [submittedReservation, setSubmittedReservation] = useState(null);
 
-  const timeSlots = useMemo(() => buildTimeSlots(form.date), [form.date]);
+  const timeSlots = useMemo(() => buildTimeSlots(form.date, settings), [form.date, settings]);
 
   useEffect(() => {
     if (!form.time && timeSlots.length > 0) {
@@ -157,7 +175,7 @@ export default function ReservationPage() {
     form.phone.trim();
 
   const handleDateChange = (value) => {
-    const nextSlots = buildTimeSlots(value);
+    const nextSlots = buildTimeSlots(value, settings);
     setForm(prev => ({
       ...prev,
       date: value,
@@ -216,7 +234,11 @@ export default function ReservationPage() {
     return (
       <div className="reservation-page">
         <section className="reservation-confirmation">
-          <div className="reservation-confirmation-mark">KO</div>
+          <div className="reservation-confirmation-mark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
           <p className="reservation-eyebrow">Reservation Confirmed</p>
           <h1 className="reservation-title">Your table is booked.</h1>
           <p className="reservation-lead">
@@ -296,15 +318,17 @@ export default function ReservationPage() {
 
           <div className="reservation-highlights">
             <div className="reservation-highlight-card">
-              <span className="reservation-highlight-value">17:00-21:00</span>
+              <span className="reservation-highlight-value">
+                {formatHour(settings.opening_hour)}–{formatHour(settings.closing_hour)}
+              </span>
               <span className="reservation-highlight-label">Dinner seating window</span>
             </div>
             <div className="reservation-highlight-card">
-              <span className="reservation-highlight-value">30 min</span>
+              <span className="reservation-highlight-value">{settings.slot_interval_minutes} min</span>
               <span className="reservation-highlight-label">Reservation intervals</span>
             </div>
             <div className="reservation-highlight-card">
-              <span className="reservation-highlight-value">8+ guests</span>
+              <span className="reservation-highlight-value">{settings.large_party_min}+ guests</span>
               <span className="reservation-highlight-label">Large party requests supported</span>
             </div>
           </div>

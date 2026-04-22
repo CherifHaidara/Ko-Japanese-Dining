@@ -37,22 +37,23 @@ function formatTypeLabel(type) {
     .join(' ');
 }
 
-function buildTimeSlots(dateString) {
+const DEFAULT_SETTINGS = { opening_hour: 17, closing_hour: 21, slot_interval_minutes: 30 };
+
+function buildTimeSlots(dateString, settings = DEFAULT_SETTINGS) {
+  const { opening_hour, closing_hour, slot_interval_minutes } = settings;
   const slots = [];
   const selectedDate = dateString ? new Date(`${dateString}T00:00:00`) : new Date();
   const now = new Date();
   const isToday = selectedDate.toDateString() === now.toDateString();
 
-  for (let hour = 17; hour <= 21; hour += 1) {
-    for (const minute of [0, 30]) {
-      if (hour === 21 && minute > 0) continue;
+  for (let hour = opening_hour; hour <= closing_hour; hour++) {
+    for (let minute = 0; minute < 60; minute += slot_interval_minutes) {
+      if (hour === closing_hour && minute > 0) continue;
 
       const slotDate = new Date(selectedDate);
       slotDate.setHours(hour, minute, 0, 0);
 
-      if (isToday && slotDate.getTime() < now.getTime()) {
-        continue;
-      }
+      if (isToday && slotDate.getTime() < now.getTime()) continue;
 
       slots.push({
         value: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`,
@@ -74,6 +75,21 @@ export default function AccountReservationsPage() {
   const [editingReservation, setEditingReservation] = useState(null);
   const [editForm, setEditForm] = useState({ date: '', time: '', partySize: '2' });
   const [actionLoading, setActionLoading] = useState(false);
+  const [confirmCancelId, setConfirmCancelId] = useState(null);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(() => {});
+  }, []);
+
+  // Lock body scroll when edit modal is open
+  useEffect(() => {
+    document.body.style.overflow = editingReservation ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [editingReservation]);
 
   const fetchReservations = useCallback(async (lookupEmail) => {
     if (!lookupEmail.trim()) return;
@@ -166,6 +182,11 @@ export default function AccountReservationsPage() {
   };
 
   const handleCancelReservation = async (reservation) => {
+    if (confirmCancelId !== reservation.id) {
+      setConfirmCancelId(reservation.id);
+      return;
+    }
+    setConfirmCancelId(null);
     setActionLoading(true);
     setError('');
     setSuccessMessage('');
@@ -282,19 +303,40 @@ export default function AccountReservationsPage() {
                   <button
                     type="button"
                     className="account-action-btn"
-                    onClick={() => openEditModal(reservation)}
+                    onClick={() => { setConfirmCancelId(null); openEditModal(reservation); }}
                     disabled={!reservation.can_modify || actionLoading}
                   >
                     Edit
                   </button>
-                  <button
-                    type="button"
-                    className="account-action-btn account-action-btn--danger"
-                    onClick={() => handleCancelReservation(reservation)}
-                    disabled={!reservation.can_cancel || actionLoading}
-                  >
-                    Cancel
-                  </button>
+                  {confirmCancelId === reservation.id ? (
+                    <>
+                      <button
+                        type="button"
+                        className="account-action-btn account-action-btn--danger"
+                        onClick={() => handleCancelReservation(reservation)}
+                        disabled={actionLoading}
+                      >
+                        {actionLoading ? 'Cancelling...' : 'Confirm Cancel'}
+                      </button>
+                      <button
+                        type="button"
+                        className="account-action-btn"
+                        onClick={() => setConfirmCancelId(null)}
+                        disabled={actionLoading}
+                      >
+                        Keep
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="account-action-btn account-action-btn--danger"
+                      onClick={() => handleCancelReservation(reservation)}
+                      disabled={!reservation.can_cancel || actionLoading}
+                    >
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </div>
             </article>
@@ -340,7 +382,7 @@ export default function AccountReservationsPage() {
                     onChange={e => setEditForm(prev => ({ ...prev, time: e.target.value }))}
                     required
                   >
-                    {buildTimeSlots(editForm.date).map(slot => (
+                    {buildTimeSlots(editForm.date, settings).map(slot => (
                       <option key={slot.value} value={slot.value}>{slot.label}</option>
                     ))}
                   </select>
@@ -362,6 +404,14 @@ export default function AccountReservationsPage() {
               </div>
 
               <div className="account-modal-actions">
+                <button
+                  type="button"
+                  className="account-action-btn"
+                  onClick={() => setEditingReservation(null)}
+                  disabled={actionLoading}
+                >
+                  Discard
+                </button>
                 <button type="submit" className="account-submit" disabled={actionLoading}>
                   {actionLoading ? 'Saving...' : 'Save Changes'}
                 </button>
