@@ -15,7 +15,7 @@ const mysql = require('mysql2/promise');
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-  password: process.env.DB_PASS,
+  password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 });
 
@@ -71,15 +71,6 @@ app.get('/private', authMiddleware, (req, res) => {
   });
 });
 
-app.get('/dev/admin-token', (req, res) => {
-  const jwt = require('jsonwebtoken');
-  const token = jwt.sign(
-    buildAdminTokenClaims({ id: 1, name: 'Test Admin' }),
-    process.env.JWT_SECRET || 'secretkey',
-    { expiresIn: '24h' }
-  );
-  res.json({ token });
-});
 
 //Email services
 

@@ -5,8 +5,8 @@ const db      = require('../database/db');
 const { buildAdminTokenClaims } = require('../auth/adminSession');
 
 const router       = express.Router();
-const JWT_SECRET   = process.env.JWT_SECRET   || 'secretkey';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin1234';
+const JWT_SECRET   = process.env.JWT_SECRET;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 const PASSWORD_RULES = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 const PASSWORD_MSG   = 'Password must be at least 8 characters and include one uppercase letter and one special character.';
