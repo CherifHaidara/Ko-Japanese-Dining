@@ -643,7 +643,7 @@ export default function AdminDashboard() {
               <button className="ad-refresh-btn" onClick={fetchOrders} disabled={ordersLoading}>Refresh</button>
             </>
           )}
-          <Link to="/" className="ad-back-link">← Back to site</Link>
+          <Link to="/" className="ad-back-link">← Back to Home</Link>
           <button className="ad-refresh-btn" onClick={() => redirectToAdminLogin('You have been signed out.')}>
             Sign Out
           </button>

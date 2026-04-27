@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <Link className="admin-login-back" to="/">← Back to site</Link>
+        <Link className="admin-login-back" to="/">← Back to home</Link>
       </div>
     </div>
   );

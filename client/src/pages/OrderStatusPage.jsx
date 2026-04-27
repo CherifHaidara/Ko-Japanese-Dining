@@ -55,7 +55,7 @@ export default function OrderStatusPage() {
       <div className="status-shell">
         <div className="status-error">
           <p>{error}</p>
-          <Link to="/" className="status-back-btn">Back to Menu</Link>
+          <Link to="/" className="status-back-btn">Back to home</Link>
         </div>
       </div>
     );
@@ -69,7 +69,7 @@ export default function OrderStatusPage() {
 
   return (
     <div className="status-shell">
-      <Link to="/" className="status-back">← Back to Menu</Link>
+      <Link to="/" className="status-back">← Back to home</Link>
 
       <div className="status-wrap">
 

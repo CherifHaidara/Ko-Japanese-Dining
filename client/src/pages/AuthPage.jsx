@@ -115,7 +115,7 @@ export default function AuthPage({ defaultTab = 'login' }) {
 
   return (
     <div className="auth-shell">
-      <Link to="/" className="auth-back">← Back to Menu</Link>
+      <Link to="/" className="auth-back">← Back to Home</Link>
 
       <div className="auth-card">
         <div className="auth-tabs">

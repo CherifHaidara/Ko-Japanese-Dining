@@ -169,7 +169,7 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-shell">
-      <Link to="/" className="profile-back">← Back to Menu</Link>
+      <Link to="/" className="profile-back">← Back to Home</Link>
 
       <div className="profile-header">
         {/* Avatar — click to upload */}
